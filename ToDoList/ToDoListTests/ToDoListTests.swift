@@ -61,6 +61,8 @@ final class ToDoListTests: XCTestCase {
         
         testCsvWithoutId()
         
+        testCsvWithoutText()
+        
         testCsvWithoutStartTime()
         
         testCsvImportant()
@@ -307,6 +309,17 @@ final class ToDoListTests: XCTestCase {
         
         // then
         XCTAssert((toDoItem == nil), "CSV без id")
+    }
+    
+    func testCsvWithoutText() {
+        // given
+        let csvWithoutText: String = "drgfgr,,важная,,false,64764856.0,"
+        
+        // when
+        let toDoItem = ToDoItem.parse(csv: csvWithoutText)
+        
+        // then
+        XCTAssert((toDoItem == nil), "CSV без text")
     }
     
     func testCsvWithoutStartTime() {

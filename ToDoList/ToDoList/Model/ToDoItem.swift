@@ -21,7 +21,6 @@ struct ToDoItem {
     let isDone: Bool
     let startTime: Date
     let changeTime: Date?
-    private let timeOffset: Double = 10800 //нужен ли???
     static let splitter: String = ","
     static let elementsOrder: String = "id,text,importance,deadline,isDone,startTime,changeTime"
     
@@ -59,12 +58,12 @@ extension ToDoItem {
         jsonDict["text"] = self.text
         jsonDict["importance"] = self.importance != .common ? self.importance.rawValue : nil
         if let deadLine = self.deadLine?.timeIntervalSince1970 {
-            jsonDict["deadLine"] = deadLine + timeOffset
+            jsonDict["deadLine"] = deadLine
         }
         jsonDict["isDone"] = self.isDone
-        jsonDict["startTime"] = self.startTime.timeIntervalSince1970 + timeOffset
+        jsonDict["startTime"] = self.startTime.timeIntervalSince1970
         if let changeTime = self.changeTime?.timeIntervalSince1970 {
-            jsonDict["changeTime"] = changeTime + timeOffset
+            jsonDict["changeTime"] = changeTime
         }
         return jsonDict
     }
@@ -114,28 +113,29 @@ extension ToDoItem {
         csvList.append(importance == .common ? "" : importance.rawValue)
         
         if let deadLine = self.deadLine {
-            csvList.append(String(deadLine.timeIntervalSince1970 + timeOffset))
+            csvList.append(String(deadLine.timeIntervalSince1970))
         } else {
             csvList.append("")
         }
         
         csvList.append(self.isDone == true ? "true" : "false")
-        csvList.append(String(self.startTime.timeIntervalSince1970 + timeOffset))
+        csvList.append(String(self.startTime.timeIntervalSince1970))
         
         if let changeTime = self.changeTime {
-            csvList.append(String(changeTime.timeIntervalSince1970 + timeOffset))
+            csvList.append(String(changeTime.timeIntervalSince1970))
         } else {
             csvList.append("")
         }
         
-        return csvList.joined(separator: ToDoItem.splitter) + "\n"// нужен ли???
+        return csvList.joined(separator: ToDoItem.splitter) + "\n"
     }
     
     static func parse(csv: String) -> ToDoItem? {
         let csvList = csv.components(separatedBy: ToDoItem.splitter)
-        // нужно ли каждую строчку проверять или достаточно только первую в FileCache
+        
         if csvList.count == 7,
            csvList[0] != "",
+           csvList[1] != "",
            let startTime = Double(csvList[5])
         {
             if let deadLine = Double(csvList[3]),
@@ -149,7 +149,7 @@ extension ToDoItem {
                changeTime >= deadLine { return nil }
             
             return ToDoItem(id: csvList[0], // id
-                            text: csvList[1], // text может ли быть пустым???
+                            text: csvList[1], // text 
                             importance: csvList[2], // importance
                             deadLineTimeIntervalSince1970: Double(csvList[3]), // deadLine
                             isDone: csvList[4] == "true" ? true : false, // isDone

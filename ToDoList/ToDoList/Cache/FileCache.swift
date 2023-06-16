@@ -17,16 +17,8 @@ class FileCache {
     
     private var firstCsvString = ToDoItem.elementsOrder + "\n"
     
-    private func avoidDublicates(for id: String) -> Int? {
-        if !items.filter({$0.id == id}).isEmpty,
-           let index = items.map({$0.id}).firstIndex(of: id) {
-            return index
-        }
-        return nil
-    }
-    
     func appendItem(_ item: ToDoItem) {
-        if let index = avoidDublicates(for: item.id) {
+        if let index = items.map({$0.id}).firstIndex(of: item.id) {
             items[index] = item
         } else {
             items.append(item)
@@ -43,7 +35,7 @@ class FileCache {
         guard let applicationSupportDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return nil }
         
         return applicationSupportDirectory
-            .appendingPathComponent(type == .json ? fileName + type.rawValue : fileName + type.rawValue)
+            .appendingPathComponent(fileName + type.rawValue)
             .path
     }
     
@@ -64,11 +56,7 @@ class FileCache {
                 .data(withJSONObject: itemsWithFirstCsvString)
         }
         
-        if FileManager.default.fileExists(atPath: filePath) {
-            try itemsToDataList.write(to: url, options: .atomic) //точно ли такой option!!!
-        } else {
-            FileManager.default.createFile(atPath: filePath, contents: itemsToDataList)
-        }
+        try itemsToDataList.write(to: url, options: [])
     }
     
     private func loadJsonDataFromFileSystem(fileName: String, type: FileType) throws -> Any? {
