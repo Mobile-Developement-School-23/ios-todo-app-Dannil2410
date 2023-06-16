@@ -33,43 +33,22 @@ final class ToDoListTests: XCTestCase {
         
         testJsonInvalid()
         
-        testJsonWithoutId()
+        testJsonMessWithDates()
         
-        testJsonWithInvalidTextType()
+        testJsonImportance()
         
-        testJsonWithoutStartTime()
-        
-        testJsonStartTimeMoreEqualDeadLine()
-        
-        testJsonStartTimeMoreEqualDeadLine()
-        
-        testJsonStartTimeMoreEqualChangeTime()
-        
-        testJsonChangeTimeMoreEqualDeadLine()
-        
-        testJsonImportant()
-        
-        testJsonUnimportant()
-        
-        testJsonCommon()
-        
+        // testing property json
+        testPropertyJsonNilKeys()
         
         // testing function parse for csv
         testCsvValid()
         
-        testCsvHasNotSevenFeatures()
+        testCsvInvalid()
         
-        testCsvWithoutId()
+        testCsvImportance()
         
-        testCsvWithoutText()
-        
-        testCsvWithoutStartTime()
-        
-        testCsvImportant()
-        
-        testCsvUnimportant()
-        
-        testCsvCommon()
+        // testing property csv
+        testPropertyCsvEmptyStrings()
         
         // testing FileCache class
         // testing function appendItem
@@ -84,6 +63,8 @@ final class ToDoListTests: XCTestCase {
 
     func testPerformanceExample() throws {
     }
+    
+    //MARK: - testing parse(json: Any)
     
     func testJsonValid() {
         // given
@@ -106,15 +87,6 @@ final class ToDoListTests: XCTestCase {
         // given
         let jsonInvalid: [String] = ["1", "2", "3"]
         
-        // when
-        let toDoItem = ToDoItem.parse(json: jsonInvalid)
-        
-        // then
-        XCTAssert((toDoItem == nil), "Тест на невалидный json")
-    }
-    
-    func testJsonWithoutId() {
-        // given
         let withoutId: [String: Any] = [
             "text": "dfcghjd",
             "importance": "важная",
@@ -122,16 +94,6 @@ final class ToDoListTests: XCTestCase {
             "startTime": 4353788.0
         ]
         
-        
-        // when
-        let toDoItem = ToDoItem.parse(json: withoutId)
-        
-        // then
-        XCTAssert((toDoItem == nil), "JSON без id")
-    }
-    
-    func testJsonWithInvalidTextType() {
-        // given
         let invalidTextType: [String: Any] = [
             "id": "fghfsdas324",
             "text": 123,
@@ -140,15 +102,6 @@ final class ToDoListTests: XCTestCase {
             "startTime": 4353788.0
         ]
         
-        // when
-        let toDoItem = ToDoItem.parse(json: invalidTextType)
-        
-        // then
-        XCTAssert((toDoItem == nil), "JSON c невалидным типом text")
-    }
-    
-    func testJsonWithoutStartTime() {
-        // given
         let withoutStartTime: [String: Any] = [
             "id": "fghfsdas324",
             "text": "hffhkffj",
@@ -157,13 +110,19 @@ final class ToDoListTests: XCTestCase {
         ]
         
         // when
-        let toDoItem = ToDoItem.parse(json: withoutStartTime)
+        let itemInvalid = ToDoItem.parse(json: jsonInvalid)
+        let itemWithoutId = ToDoItem.parse(json: withoutId)
+        let itemInvalidTextType = ToDoItem.parse(json: invalidTextType)
+        let itemWithoutStartTime = ToDoItem.parse(json: withoutStartTime)
         
         // then
-        XCTAssert((toDoItem == nil), "JSON без startTime")
+        XCTAssert((itemInvalid == nil), "Тест на невалидный json")
+        XCTAssert((itemWithoutId == nil), "JSON без id")
+        XCTAssert((itemInvalidTextType == nil), "JSON c невалидным типом text")
+        XCTAssert((itemWithoutStartTime == nil), "JSON без startTime")
     }
     
-    func testJsonStartTimeMoreEqualDeadLine() {
+    func testJsonMessWithDates() {
         // given
         let startTimeMoreEqualDeadLine: [String: Any] = [
             "id": "fghfsdas324",
@@ -174,15 +133,6 @@ final class ToDoListTests: XCTestCase {
             "deadLine": 435378.0
         ]
         
-        // when
-        let toDoItem = ToDoItem.parse(json: startTimeMoreEqualDeadLine)
-        
-        // then
-        XCTAssert((toDoItem == nil), "JSON без startTime >= deadLine")
-    }
-    
-    func testJsonStartTimeMoreEqualChangeTime() {
-        // given
         let startTimeMoreEqualChangeTime: [String: Any] = [
             "id": "fghfsdas324",
             "text": "hffhkffj",
@@ -192,15 +142,6 @@ final class ToDoListTests: XCTestCase {
             "changeTime": 435378.0
         ]
         
-        // when
-        let toDoItem = ToDoItem.parse(json: startTimeMoreEqualChangeTime)
-        
-        // then
-        XCTAssert((toDoItem == nil), "JSON без startTime >= changeLine")
-    }
-    
-    func testJsonChangeTimeMoreEqualDeadLine() {
-        // given
         let changeTimeMoreEqualDeadLine: [String: Any] = [
             "id": "fghfsdas324",
             "text": "hffhkffj",
@@ -212,13 +153,17 @@ final class ToDoListTests: XCTestCase {
         ]
         
         // when
-        let toDoItem = ToDoItem.parse(json: changeTimeMoreEqualDeadLine)
+        let itemStartTimeMoreEqualDeadLine = ToDoItem.parse(json: startTimeMoreEqualDeadLine)
+        let itemStartTimeMoreEqualChangeTime = ToDoItem.parse(json: startTimeMoreEqualChangeTime)
+        let itemChangeTimeMoreEqualDeadLine = ToDoItem.parse(json: changeTimeMoreEqualDeadLine)
         
         // then
-        XCTAssert((toDoItem == nil), "JSON без changeTime >= deadLine")
+        XCTAssert((itemStartTimeMoreEqualDeadLine == nil), "JSON без startTime >= deadLine")
+        XCTAssert((itemStartTimeMoreEqualChangeTime == nil), "JSON без startTime >= changeLine")
+        XCTAssert((itemChangeTimeMoreEqualDeadLine == nil), "JSON без changeTime >= deadLine")
     }
     
-    func testJsonImportant() {
+    func testJsonImportance() {
         // given
         let jsonImportant: [String: Any] = [
             "id": "fghfsdas324",
@@ -228,15 +173,6 @@ final class ToDoListTests: XCTestCase {
             "startTime": 4353788.0
         ]
         
-        // when
-        let toDoItem = ToDoItem.parse(json: jsonImportant)
-        
-        // then
-        XCTAssert((toDoItem?.importance == Importance.important), "Json важный item")
-    }
-    
-    func testJsonUnimportant() {
-        // given
         let jsonUnimportant: [String: Any] = [
             "id": "fghfsdas324",
             "text": "dfcghjd",
@@ -245,15 +181,6 @@ final class ToDoListTests: XCTestCase {
             "startTime": 4353788.0
         ]
         
-        // when
-        let toDoItem = ToDoItem.parse(json: jsonUnimportant)
-        
-        // then
-        XCTAssert((toDoItem?.importance == Importance.unimportant), "Json неважный item")
-    }
-    
-    func testJsonCommon() {
-        // given
         let jsonEmpty: [String: Any] = [
             "id": "fghfsdas324",
             "text": "dfcghjd",
@@ -270,13 +197,41 @@ final class ToDoListTests: XCTestCase {
         ]
         
         // when
-        let toDoItemEmpty = ToDoItem.parse(json: jsonEmpty)
-        let toDoItemRubbish = ToDoItem.parse(json: jsonRubbish)
+        let itemImportant = ToDoItem.parse(json: jsonImportant)
+        let itemUnimportant = ToDoItem.parse(json: jsonUnimportant)
+        let itemEmpty = ToDoItem.parse(json: jsonEmpty)
+        let itemRubbish = ToDoItem.parse(json: jsonRubbish)
         
         // then
-        XCTAssert((toDoItemEmpty?.importance == Importance.common), "CSV обычный item")
-        XCTAssert((toDoItemRubbish?.importance == Importance.common), "CSV обычный item")
+        XCTAssert((itemImportant?.importance == Importance.important), "JSON важный item")
+        XCTAssert((itemUnimportant?.importance == Importance.unimportant), "JSON неважный item")
+        XCTAssert((itemEmpty?.importance == Importance.common), "JSON обычный item")
+        XCTAssert((itemRubbish?.importance == Importance.common), "JSON обычный item")
     }
+
+    //MARK: - testing property json: Any
+    
+    func testPropertyJsonNilKeys() {
+        // given
+        let propertyJson: [String: Any] = [
+            "id": "fghfsdas324",
+            "text": "dfcghjd",
+            "importance": "обычная",
+            "isDone": true,
+            "startTime": 4353788.0
+        ]
+        
+        // when
+        let toDoItem = ToDoItem.parse(json: propertyJson)
+        let jsonDict = toDoItem?.json as? [String: Any]
+        
+        // then
+        XCTAssert((jsonDict?["importance"] == nil), "JSON не имеет importance для обычная важность")
+        XCTAssert((jsonDict?["deadLine"] == nil), "JSON не имеет deadLine")
+        XCTAssert((jsonDict?["changeTime"] == nil), "JSON не имеет changeTime")
+    }
+    
+    //MARK: - testing parse(csv: String)
     
     func testCsvValid() {
         // given
@@ -289,85 +244,86 @@ final class ToDoListTests: XCTestCase {
         XCTAssert((toDoItem != nil), "CSV валидный")
     }
     
-    func testCsvHasNotSevenFeatures() {
+    func testCsvInvalid() {
         // given
         let csvHasNotSevenFeatures: String = "1,4,2,6,8,8"
         
-        // when
-        let toDoItem = ToDoItem.parse(csv: csvHasNotSevenFeatures)
-        
-        // then
-        XCTAssert((toDoItem == nil), "CSV имеет неверное количество фичей")
-    }
-    
-    func testCsvWithoutId() {
-        // given
         let csvWithoutId: String = ",text,важная,,false,64764856.0,"
         
-        // when
-        let toDoItem = ToDoItem.parse(csv: csvWithoutId)
-        
-        // then
-        XCTAssert((toDoItem == nil), "CSV без id")
-    }
-    
-    func testCsvWithoutText() {
-        // given
         let csvWithoutText: String = "drgfgr,,важная,,false,64764856.0,"
         
-        // when
-        let toDoItem = ToDoItem.parse(csv: csvWithoutText)
-        
-        // then
-        XCTAssert((toDoItem == nil), "CSV без text")
-    }
-    
-    func testCsvWithoutStartTime() {
-        // given
         let csvHasWithoutStartTime: String = "gdffhh,text,важная,,false,,"
         
         // when
-        let toDoItem = ToDoItem.parse(csv: csvHasWithoutStartTime)
+        let itemHasNotSevenFeatures = ToDoItem.parse(csv: csvHasNotSevenFeatures)
+        let itemWithoutId = ToDoItem.parse(csv: csvWithoutId)
+        let itemWithoutText = ToDoItem.parse(csv: csvWithoutText)
+        let itemHasWithoutStartTime = ToDoItem.parse(csv: csvHasWithoutStartTime)
         
         // then
-        XCTAssert((toDoItem == nil), "CSV без startTime")
+        XCTAssert((itemHasNotSevenFeatures == nil), "CSV имеет неверное количество фичей")
+        XCTAssert((itemWithoutId == nil), "CSV без id")
+        XCTAssert((itemWithoutText == nil), "CSV без text")
+        XCTAssert((itemHasWithoutStartTime == nil), "CSV без startTime")
     }
     
-    func testCsvImportant() {
+    func testCsvImportance() {
         // given
         let csvImportant: String = "dgfdjhhzd,text,важная,,false,64764856.0,"
         
-        // when
-        let toDoItem = ToDoItem.parse(csv: csvImportant)
-        
-        // then
-        XCTAssert((toDoItem?.importance == Importance.important), "CSV важный item")
-    }
-    
-    func testCsvUnimportant() {
-        // given
         let csvUnimportant: String = "dgfdjhhzd,text,неважная,,false,64764856.0,"
         
-        // when
-        let toDoItem = ToDoItem.parse(csv: csvUnimportant)
-        
-        // then
-        XCTAssert((toDoItem?.importance == Importance.unimportant), "CSV неважный item")
-    }
-    
-    func testCsvCommon() {
-        // given
         let csvEmpty: String = "dgfdjhhzd,text,,,false,64764856.0,"
+        
         let csvRubbish: String = "dgfdjhhzd,text,gfbsn,,false,64764856.0,"
         
         // when
-        let toDoItemEmpty = ToDoItem.parse(csv: csvEmpty)
-        let toDoItemRubbish = ToDoItem.parse(csv: csvRubbish)
+        let itemImportant = ToDoItem.parse(csv: csvImportant)
+        let itemUnimportant = ToDoItem.parse(csv: csvUnimportant)
+        let itemEmpty = ToDoItem.parse(csv: csvEmpty)
+        let itemRubbish = ToDoItem.parse(csv: csvRubbish)
         
         // then
-        XCTAssert((toDoItemEmpty?.importance == Importance.common), "CSV обычный item")
-        XCTAssert((toDoItemRubbish?.importance == Importance.common), "CSV обычный item")
+        XCTAssert((itemImportant?.importance == Importance.important), "CSV важный item")
+        XCTAssert((itemUnimportant?.importance == Importance.unimportant), "CSV неважный item")
+        XCTAssert((itemEmpty?.importance == Importance.common), "CSV обычный item")
+        XCTAssert((itemRubbish?.importance == Importance.common), "CSV обычный item")
     }
+    
+    //MARK: - testing property csv: Any
+    
+    func testPropertyCsvEmptyStrings() {
+        // given
+        let csvCommon: String = "dgfdjhhzd,text,обычная,,false,64764856.0,"
+        
+        let csvDeadline: String = "dgfdjhhzd,text,неважная,,false,64764856.0,64764858.0"
+        
+        let csvChangeTime: String = "dgfdjhhzd,text,важная,64764858.0,false,64764856.0,"
+        
+        // when
+        let itemCommon = ToDoItem.parse(csv: csvCommon)
+        let string = itemCommon?.csv.filter({ !"\n".contains($0) })
+        let stringCommon = string?.components(separatedBy: ",")
+        
+        let itemDeadline = ToDoItem.parse(csv: csvDeadline)
+        let stringDead = itemDeadline?.csv.filter({ !"\n".contains($0) })
+        let stringDeadline = stringDead?.components(separatedBy: ",")
+        
+        let itemChangeTime = ToDoItem.parse(csv: csvChangeTime)
+        let stringChange = itemChangeTime?.csv.filter({ !"\n".contains($0) })
+        let stringChangeTime = stringChange?.components(separatedBy: ",")
+        
+        // then
+        XCTAssert((stringCommon?[2] == ""), "CSV обычная важность")
+        XCTAssert((stringCommon?.count == 7), "CSV обычная важность")
+        XCTAssert((stringDeadline?[3] == ""), "CSV нет deadLine")
+        XCTAssert((stringDeadline?.count == 7), "CSV обычная важность")
+        XCTAssert((stringChangeTime?[6] == ""), "CSV нет changeTime")
+        XCTAssert((stringChangeTime?.count == 7), "CSV обычная важность")
+    }
+    
+    
+    //MARK: - testing FileCache function appendItem(_ item: ToDoItem) and deleteItem(for id: String)
     
     func testFileCacheAppendItem() {
         // given
