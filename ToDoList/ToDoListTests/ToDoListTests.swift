@@ -26,39 +26,6 @@ final class ToDoListTests: XCTestCase {
     }
 
     func testExample() throws {
-        
-        // testing ToDoItem class
-        // testing function parse for json
-        testJsonValid()
-        
-        testJsonInvalid()
-        
-        testJsonMessWithDates()
-        
-        testJsonImportance()
-        
-        // testing property json
-        testPropertyJsonNilKeys()
-        
-        // testing function parse for csv
-        testCsvValid()
-        
-        testCsvInvalid()
-        
-        testCsvImportance()
-        
-        // testing property csv
-        testPropertyCsvEmptyStrings()
-        
-        // testing FileCache class
-        // testing function appendItem
-        testFileCacheAppendItem()
-        
-        testFileCacheAppendItemOnDublicates()
-        
-        testFileCacheDeleteItem()
-        
-        testFileCacheDeleteItemIfIdDoNotExist()
     }
 
     func testPerformanceExample() throws {
@@ -117,7 +84,7 @@ final class ToDoListTests: XCTestCase {
         
         // then
         XCTAssert((itemInvalid == nil), "Тест на невалидный json")
-        XCTAssert((itemWithoutId == nil), "JSON без id")
+        XCTAssert((itemWithoutId != nil), "JSON без id")
         XCTAssert((itemInvalidTextType == nil), "JSON c невалидным типом text")
         XCTAssert((itemWithoutStartTime == nil), "JSON без startTime")
     }
@@ -262,7 +229,7 @@ final class ToDoListTests: XCTestCase {
         
         // then
         XCTAssert((itemHasNotSevenFeatures == nil), "CSV имеет неверное количество фичей")
-        XCTAssert((itemWithoutId == nil), "CSV без id")
+        XCTAssert((itemWithoutId != nil), "CSV без id")
         XCTAssert((itemWithoutText == nil), "CSV без text")
         XCTAssert((itemHasWithoutStartTime == nil), "CSV без startTime")
     }
@@ -327,7 +294,7 @@ final class ToDoListTests: XCTestCase {
     
     func testFileCacheAppendItem() {
         // given
-        let item = ToDoItem(id: "fghfsdas324", text: "dfcghjd", importance: "важная", deadLineTimeIntervalSince1970: nil, isDone: true, startTimeIntervalSince1970: 364565446.0, changeTimeIntervalSince1970: nil)
+        let item = ToDoItem(id: "fghfsdas324", text: "dfcghjd", importance: .important, deadLineTimeIntervalSince1970: nil, isDone: true, startTimeIntervalSince1970: 364565446.0, changeTimeIntervalSince1970: nil)
         let itemsCount = fileCache.items.count
         
         // when
@@ -339,7 +306,7 @@ final class ToDoListTests: XCTestCase {
     
     func testFileCacheAppendItemOnDublicates() {
         // given
-        let item = ToDoItem(id: "fghfsdas324", text: "dfcghjfdbfbsd", importance: "неважная", deadLineTimeIntervalSince1970: nil, isDone: true, startTimeIntervalSince1970: 364565446.0, changeTimeIntervalSince1970: nil)
+        let item = ToDoItem(id: "fghfsdas324", text: "dfcghjfdbfbsd", importance: .unimportant, deadLineTimeIntervalSince1970: nil, isDone: true, startTimeIntervalSince1970: 364565446.0, changeTimeIntervalSince1970: nil)
         fileCache.appendItem(item)
         let itemsCount = fileCache.items.count
         
@@ -351,7 +318,7 @@ final class ToDoListTests: XCTestCase {
 
     func testFileCacheDeleteItem() {
         // given
-        let item = ToDoItem(id: "fghfsdas324", text: "dfcghjfdbfbsd", importance: "неважная", deadLineTimeIntervalSince1970: nil, isDone: true, startTimeIntervalSince1970: 364565446.0, changeTimeIntervalSince1970: nil)
+        let item = ToDoItem(id: "fghfsdas324", text: "dfcghjfdbfbsd", importance: .unimportant, deadLineTimeIntervalSince1970: nil, isDone: true, startTimeIntervalSince1970: 364565446.0, changeTimeIntervalSince1970: nil)
         fileCache.appendItem(item)
         let itemsCount = fileCache.items.count
         
@@ -363,7 +330,7 @@ final class ToDoListTests: XCTestCase {
     
     func testFileCacheDeleteItemIfIdDoNotExist() {
         // given
-        let item = ToDoItem(id: "fghfsdas324", text: "dfcghjfdbfbsd", importance: "неважная", deadLineTimeIntervalSince1970: nil, isDone: true, startTimeIntervalSince1970: 364565446.0, changeTimeIntervalSince1970: nil)
+        let item = ToDoItem(id: "fghfsdas324", text: "dfcghjfdbfbsd", importance: .unimportant, deadLineTimeIntervalSince1970: nil, isDone: true, startTimeIntervalSince1970: 364565446.0, changeTimeIntervalSince1970: nil)
         fileCache.appendItem(item)
         let itemsCount = fileCache.items.count
         

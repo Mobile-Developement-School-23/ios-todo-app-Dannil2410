@@ -15,7 +15,7 @@ enum FileType: String {
 class FileCache {
     private(set) var items = [ToDoItem]()
     
-    private var firstCsvString = ToDoItem.elementsOrder + "\n"
+    private var firstCsvString = ToDoItem.elementsOrder
     
     func appendItem(_ item: ToDoItem) {
         if let index = items.map({$0.id}).firstIndex(of: item.id) {
@@ -53,13 +53,13 @@ class FileCache {
             var itemsWithFirstCsvString: [String] = [firstCsvString]
             itemsWithFirstCsvString.append(contentsOf: items.map({ $0.csv }))
             itemsToDataList = try JSONSerialization
-                .data(withJSONObject: itemsWithFirstCsvString)
+                .data(withJSONObject: itemsWithFirstCsvString.joined(separator: "\n"))
         }
         
         try itemsToDataList.write(to: url, options: [])
     }
     
-    private func loadJsonDataFromFileSystem(fileName: String, type: FileType) throws -> Any? {
+    private func loadDataFromFileSystem(fileName: String, type: FileType) throws -> Any? {
         guard let filePath = getFilePath(fileName: fileName, type: type),
               let url = URL(string: filePath) else { return nil }
         
@@ -72,7 +72,7 @@ class FileCache {
     }
     
     func loadItemsFromFileSystem(fileName: String, type: FileType) throws {
-        if let data = try loadJsonDataFromFileSystem(fileName: fileName, type: type)
+        if let data = try loadDataFromFileSystem(fileName: fileName, type: type)
         {
             switch type {
             case .json:

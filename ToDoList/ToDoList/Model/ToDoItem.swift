@@ -22,14 +22,14 @@ struct ToDoItem {
     let startTime: Date
     let changeTime: Date?
     static let splitter: String = ","
-    static let elementsOrder: String = "id,text,importance,deadline,isDone,startTime,changeTime"
+    static let elementsOrder: String = "id,text,importance,deadLine,isDone,startTime,changeTime"
     
-    init(id: String = UUID().uuidString, text: String, importance: String?, deadLineTimeIntervalSince1970: Double?, isDone: Bool, startTimeIntervalSince1970: Double = Date.now.timeIntervalSince1970, changeTimeIntervalSince1970: Double?) {
+    init(id: String = UUID().uuidString, text: String, importance: Importance, deadLineTimeIntervalSince1970: Double?, isDone: Bool, startTimeIntervalSince1970: Double = Date.now.timeIntervalSince1970, changeTimeIntervalSince1970: Double?) {
         
         self.id = id
         self.text = text
         
-        self.importance = importance == "важная" ? Importance.important : (importance == "неважная" ? Importance.unimportant : Importance.common)
+        self.importance = importance
         
         if let deadLine = deadLineTimeIntervalSince1970 {
             self.deadLine = Date(timeIntervalSince1970: deadLine)
@@ -70,14 +70,16 @@ extension ToDoItem {
     
     static func parse(json: Any) -> ToDoItem? {
         if let jsonDict = json as? [String: Any],
-           let id = jsonDict["id"] as? String,
            let text = jsonDict["text"] as? String,
            let startTime = jsonDict["startTime"] as? Double
         {
-            let importance = jsonDict["importance"] as? String
+            let id = jsonDict["id"] as? String ?? UUID().uuidString
             let isDone = jsonDict["isDone"] as? Bool
             let deadLine = jsonDict["deadLine"] as? Double
             let changeTime = jsonDict["changeTime"] as? Double
+            
+            let importanceString = jsonDict["importance"] as? String
+            let importanceEnum = importanceString == "важная" ? Importance.important : (importanceString == "неважная" ? Importance.unimportant : Importance.common)
             
             if let deadLine = deadLine,
                startTime >= deadLine { return nil }
@@ -92,7 +94,7 @@ extension ToDoItem {
             
             return ToDoItem(id: id,
                             text: text,
-                            importance: importance,
+                            importance: importanceEnum,
                             deadLineTimeIntervalSince1970: deadLine,
                             isDone: isDone == true ? true : false,
                             startTimeIntervalSince1970: startTime,
@@ -127,17 +129,18 @@ extension ToDoItem {
             csvList.append("")
         }
         
-        return csvList.joined(separator: ToDoItem.splitter) + "\n"
+        return csvList.joined(separator: ToDoItem.splitter)
     }
     
     static func parse(csv: String) -> ToDoItem? {
         let csvList = csv.components(separatedBy: ToDoItem.splitter)
         
         if csvList.count == 7,
-           csvList[0] != "",
-           csvList[1] != "",
+           !csvList[1].isEmpty,
            let startTime = Double(csvList[5])
         {
+            let importanceEnum = csvList[2] == "важная" ? Importance.important : (csvList[2] == "неважная" ? Importance.unimportant : Importance.common)
+            
             if let deadLine = Double(csvList[3]),
                startTime >= deadLine { return nil }
             
@@ -148,9 +151,9 @@ extension ToDoItem {
                let changeTime = Double(csvList[6]),
                changeTime >= deadLine { return nil }
             
-            return ToDoItem(id: csvList[0], // id
+            return ToDoItem(id: !csvList[0].isEmpty ? csvList[0] : UUID().uuidString, // id
                             text: csvList[1], // text 
-                            importance: csvList[2], // importance
+                            importance: importanceEnum, // importance
                             deadLineTimeIntervalSince1970: Double(csvList[3]), // deadLine
                             isDone: csvList[4] == "true" ? true : false, // isDone
                             startTimeIntervalSince1970: startTime, // startTime
