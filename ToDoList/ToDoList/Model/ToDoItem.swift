@@ -135,24 +135,30 @@ extension ToDoItem {
     static func parse(csv: String) -> ToDoItem? {
         let csvList = csv.components(separatedBy: ToDoItem.splitter)
         
-        if csvList.count == 7,
+        if csvList.count >= 7,
            !csvList[1].isEmpty,
-           let startTime = Double(csvList[5])
+           let startTime = Double(csvList[csvList.count-2])
         {
-            let importanceEnum = csvList[2] == "важная" ? Importance.important : (csvList[2] == "неважная" ? Importance.unimportant : Importance.common)
+            let importanceEnum = csvList[csvList.count-5] == "важная" ? Importance.important : (csvList[csvList.count-5] == "неважная" ? Importance.unimportant : Importance.common)
             
-            if let deadLine = Double(csvList[3]),
+            if let deadLine = Double(csvList[csvList.count-4]),
                startTime >= deadLine { return nil }
             
-            if let changeTime = Double(csvList[6]),
+            if let changeTime = Double(csvList[csvList.count-1]),
                startTime >= changeTime { return nil }
             
-            if let deadLine = Double(csvList[3]),
-               let changeTime = Double(csvList[6]),
+            if let deadLine = Double(csvList[csvList.count-4]),
+               let changeTime = Double(csvList[csvList.count-1]),
                changeTime >= deadLine { return nil }
             
+            var text = csvList[1]
+            
+            for i in 2..<(csvList.count-5) {
+                text += "," + csvList[i]
+            }
+            
             return ToDoItem(id: !csvList[0].isEmpty ? csvList[0] : UUID().uuidString, // id
-                            text: csvList[1], // text 
+                            text: text, // text
                             importance: importanceEnum, // importance
                             deadLineTimeIntervalSince1970: Double(csvList[3]), // deadLine
                             isDone: csvList[4] == "true" ? true : false, // isDone

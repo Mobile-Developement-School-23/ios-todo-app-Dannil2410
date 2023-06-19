@@ -31,41 +31,45 @@ class FileCache {
         }
     }
     
-    private func getFilePath(fileName: String, type: FileType) -> String? {
-        guard let applicationSupportDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return nil }
+    private func getFilePath(fileName: String, type: FileType) -> URL? {
+        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
         
-        return applicationSupportDirectory
+        return documentDirectory
             .appendingPathComponent(fileName + type.rawValue)
-            .path
+            
     }
     
     func saveItemsToFileSystem(fileName: String, type: FileType) throws {
-        guard let filePath = getFilePath(fileName: fileName, type: type),
-              let url = URL(string: filePath) else { return }
+        guard let filePath = getFilePath(fileName: fileName, type: type) else { return }
+        print(filePath)
         
-        var itemsToDataList: Data
+        var itemsToData: Data?
         
         switch type {
         case .json:
-            itemsToDataList = try JSONSerialization
+            itemsToData = try JSONSerialization
                 .data(withJSONObject: items.map({$0.json}))
         case .csv:
             var itemsWithFirstCsvString: [String] = [firstCsvString]
             itemsWithFirstCsvString.append(contentsOf: items.map({ $0.csv }))
-            itemsToDataList = try JSONSerialization
-                .data(withJSONObject: itemsWithFirstCsvString.joined(separator: "\n"))
+            itemsToData = itemsWithFirstCsvString.joined(separator: "\n").data(using: .utf8)
         }
         
-        try itemsToDataList.write(to: url, options: [])
+        guard let itemsToData = itemsToData else { return } // можно в будущем пробросить ошибку
+        try itemsToData.write(to: filePath, options: [])
     }
     
     private func loadDataFromFileSystem(fileName: String, type: FileType) throws -> Any? {
-        guard let filePath = getFilePath(fileName: fileName, type: type),
-              let url = URL(string: filePath) else { return nil }
+        guard let filePath = getFilePath(fileName: fileName, type: type) else { return nil }
         
-        if FileManager.default.fileExists(atPath: filePath) {
-            let data = try Data(contentsOf: url)
-            return try JSONSerialization.jsonObject(with: data)
+        if FileManager.default.fileExists(atPath: filePath.path) {
+            let data = try Data(contentsOf: filePath)
+            switch type {
+            case .json:
+                return try JSONSerialization.jsonObject(with: data)
+            case .csv:
+                return try String(contentsOf: filePath, encoding: .utf8)
+            }
         }
         
         return nil
@@ -83,7 +87,7 @@ class FileCache {
                 if let csvString = data as? String {
                     var csvList = csvString.components(separatedBy: "\n")
                     guard csvList[0].components(separatedBy: ",").count == 7 else { return }
-                    firstCsvString = csvList.removeFirst() + "\n"
+                    firstCsvString = csvList.removeFirst()
                     items = csvList.map({ToDoItem.parse(csv: $0)}).compactMap { $0 }
                 }
             }
