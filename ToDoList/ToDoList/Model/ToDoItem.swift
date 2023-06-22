@@ -7,11 +7,11 @@
 
 import Foundation
 
-enum Importance: String {
-    case important = "важная"
-    case unimportant = "неважная"
+enum Importance: String, CaseIterable {
     case common = "обычная"
-}
+    case unimportant = "неважная"
+    case important = "важная"
+    }
 
 struct ToDoItem {
     let id: String
@@ -24,7 +24,7 @@ struct ToDoItem {
     static let splitter: String = ","
     static let elementsOrder: String = "id,text,importance,deadLine,isDone,startTime,changeTime"
     
-    init(id: String = UUID().uuidString, text: String, importance: Importance, deadLineTimeIntervalSince1970: Double?, isDone: Bool, startTimeIntervalSince1970: Double = Date.now.timeIntervalSince1970, changeTimeIntervalSince1970: Double?) {
+    init(id: String = UUID().uuidString, text: String, importance: Importance, deadLineTimeIntervalSince1970: Double?, isDone: Bool, startTimeIntervalSince1970: Double, changeTimeIntervalSince1970: Double?) {
         
         self.id = id
         self.text = text

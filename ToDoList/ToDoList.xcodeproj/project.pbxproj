@@ -7,9 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C83C120F2A40E1F600950448 /* TextCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C120E2A40E1F600950448 /* TextCell.swift */; };
+		C83C12122A417A5400950448 /* ImportanceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12112A417A5400950448 /* ImportanceCell.swift */; };
+		C83C121F2A41E5D200950448 /* SetDeadLineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C121E2A41E5D200950448 /* SetDeadLineCell.swift */; };
+		C83C12242A42FD9100950448 /* CalendarCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12232A42FD9100950448 /* CalendarCell.swift */; };
+		C83C12262A432F5F00950448 /* DeleteCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12252A432F5F00950448 /* DeleteCell.swift */; };
+		C83C12282A4380D400950448 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12272A4380D400950448 /* UIViewExtension.swift */; };
 		C8686A7B2A375561000C9CF3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A7A2A375561000C9CF3 /* AppDelegate.swift */; };
 		C8686A7D2A375561000C9CF3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A7C2A375561000C9CF3 /* SceneDelegate.swift */; };
-		C8686A7F2A375561000C9CF3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A7E2A375561000C9CF3 /* ViewController.swift */; };
+		C8686A7F2A375561000C9CF3 /* ItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A7E2A375561000C9CF3 /* ItemViewController.swift */; };
 		C8686A822A375561000C9CF3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8686A802A375561000C9CF3 /* Main.storyboard */; };
 		C8686A852A375561000C9CF3 /* ToDoList.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C8686A832A375561000C9CF3 /* ToDoList.xcdatamodeld */; };
 		C8686A872A375563000C9CF3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C8686A862A375563000C9CF3 /* Assets.xcassets */; };
@@ -39,10 +45,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C83C120E2A40E1F600950448 /* TextCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCell.swift; sourceTree = "<group>"; };
+		C83C12112A417A5400950448 /* ImportanceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportanceCell.swift; sourceTree = "<group>"; };
+		C83C121E2A41E5D200950448 /* SetDeadLineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDeadLineCell.swift; sourceTree = "<group>"; };
+		C83C12232A42FD9100950448 /* CalendarCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarCell.swift; sourceTree = "<group>"; };
+		C83C12252A432F5F00950448 /* DeleteCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteCell.swift; sourceTree = "<group>"; };
+		C83C12272A4380D400950448 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
 		C8686A772A375561000C9CF3 /* ToDoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8686A7A2A375561000C9CF3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C8686A7C2A375561000C9CF3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		C8686A7E2A375561000C9CF3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		C8686A7E2A375561000C9CF3 /* ItemViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemViewController.swift; sourceTree = "<group>"; };
 		C8686A812A375561000C9CF3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		C8686A842A375561000C9CF3 /* ToDoList.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ToDoList.xcdatamodel; sourceTree = "<group>"; };
 		C8686A862A375563000C9CF3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -82,6 +94,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C83C12102A40E1FA00950448 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				C83C120E2A40E1F600950448 /* TextCell.swift */,
+				C83C12112A417A5400950448 /* ImportanceCell.swift */,
+				C83C121E2A41E5D200950448 /* SetDeadLineCell.swift */,
+				C83C12232A42FD9100950448 /* CalendarCell.swift */,
+				C83C12252A432F5F00950448 /* DeleteCell.swift */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
+		C83C12292A4380DB00950448 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				C83C12272A4380D400950448 /* UIViewExtension.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		C83C122D2A44996D00950448 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				C8686A7E2A375561000C9CF3 /* ItemViewController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
 		C8686A6E2A375561000C9CF3 = {
 			isa = PBXGroup;
 			children = (
@@ -107,9 +147,11 @@
 			children = (
 				C8CE8E0C2A3C5A98002A2A00 /* Model */,
 				C8CE8E0D2A3C5AA6002A2A00 /* Cache */,
+				C83C12102A40E1FA00950448 /* Cells */,
+				C83C122D2A44996D00950448 /* Controllers */,
+				C83C12292A4380DB00950448 /* Extensions */,
 				C8686A7A2A375561000C9CF3 /* AppDelegate.swift */,
 				C8686A7C2A375561000C9CF3 /* SceneDelegate.swift */,
-				C8686A7E2A375561000C9CF3 /* ViewController.swift */,
 				C8686A802A375561000C9CF3 /* Main.storyboard */,
 				C8686A862A375563000C9CF3 /* Assets.xcassets */,
 				C8686A882A375563000C9CF3 /* LaunchScreen.storyboard */,
@@ -283,11 +325,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8686A7F2A375561000C9CF3 /* ViewController.swift in Sources */,
+				C8686A7F2A375561000C9CF3 /* ItemViewController.swift in Sources */,
+				C83C12122A417A5400950448 /* ImportanceCell.swift in Sources */,
 				C8686A7B2A375561000C9CF3 /* AppDelegate.swift in Sources */,
 				C8686AAE2A375587000C9CF3 /* ToDoItem.swift in Sources */,
+				C83C120F2A40E1F600950448 /* TextCell.swift in Sources */,
+				C83C121F2A41E5D200950448 /* SetDeadLineCell.swift in Sources */,
+				C83C12242A42FD9100950448 /* CalendarCell.swift in Sources */,
 				C8686A7D2A375561000C9CF3 /* SceneDelegate.swift in Sources */,
+				C83C12282A4380D400950448 /* UIViewExtension.swift in Sources */,
 				C8CE8DF82A389472002A2A00 /* FileCache.swift in Sources */,
+				C83C12262A432F5F00950448 /* DeleteCell.swift in Sources */,
 				C8686A852A375561000C9CF3 /* ToDoList.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
