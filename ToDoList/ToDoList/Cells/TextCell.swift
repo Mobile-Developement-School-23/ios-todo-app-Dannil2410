@@ -31,13 +31,13 @@ class TextCell: UITableViewCell {
         
         textView.text = "Что надо сделать?"
         textView.delegate = self
-        textView.isScrollEnabled = false
+        //textView.isScrollEnabled = false
         textView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(textView)
         return textView
     }()
     
-    private lazy var textViewHeightConstraint = self.textView.heightAnchor.constraint(equalToConstant: 120)
+    private lazy var textViewHeightConstraint = self.textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 120)
     
     //MARK: - Lifeceircle
     
@@ -118,6 +118,9 @@ extension TextCell: UITextViewDelegate {
                 object: nil,
                 userInfo: ["hasText": textView.hasText ? true : false]
             )
+        
+        textViewHeightConstraint.constant = textView.intrinsicContentSize.height < 120 ? 120 : textView.intrinsicContentSize.height
+        textView.layoutIfNeeded()
     }
     
     //MARK: - Make placeholder
