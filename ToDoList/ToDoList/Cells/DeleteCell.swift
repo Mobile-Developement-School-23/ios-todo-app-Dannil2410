@@ -15,7 +15,15 @@ class DeleteCell: UITableViewCell {
     
     lazy var deleteLabel: UILabel = {
         let deleteLabel = UILabel()
-        deleteLabel.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+        deleteLabel.textColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
+            default:
+                return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+            }
+        })
         deleteLabel.font = UIFont.systemFont(ofSize: 17)
         deleteLabel.text = "Удалить"
         deleteLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -55,6 +63,16 @@ class DeleteCell: UITableViewCell {
     
     private func configureCell() {
         selectionStyle = .none
+        
+        backgroundColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
+            default:
+                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+            }
+        })
     }
     
     private func configureDeleteLabel() {
@@ -76,7 +94,27 @@ class DeleteCell: UITableViewCell {
     
     @objc private func toDoIfHasText(_ notification: Notification) {
         let hasText = notification.userInfo?["hasText"] as? Bool ?? false
-        self.deleteLabel.textColor = hasText ? UIColor(red: 1, green: 0.231, blue: 0.188, alpha: 1) : UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+        if hasText {
+            self.deleteLabel.textColor = UIColor(dynamicProvider: {
+                traitCollection in
+                switch traitCollection.userInterfaceStyle {
+                case .dark:
+                    return UIColor(red: 1, green: 0.271, blue: 0.227, alpha: 1)
+                default:
+                    return UIColor(red: 1, green: 0.231, blue: 0.188, alpha: 1)
+                }
+            })
+        } else {
+            self.deleteLabel.textColor = UIColor(dynamicProvider: {
+                traitCollection in
+                switch traitCollection.userInterfaceStyle {
+                case .dark:
+                    return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
+                default:
+                    return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+                }
+            })
+        }
     }
     
     //MARK: fuctions for setting cornerRadius for cell

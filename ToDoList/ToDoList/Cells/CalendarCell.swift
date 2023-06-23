@@ -23,6 +23,7 @@ class CalendarCell: UITableViewCell {
         let calendarView = UICalendarView()
         let gregorianCalendar = Calendar(identifier: .gregorian)
         calendarView.calendar = gregorianCalendar
+        calendarView.locale = Locale(identifier: "ru_RU")
         
         calendarView.availableDateRange = DateInterval(start: Date.now, end: Date.distantFuture)
     
@@ -63,6 +64,16 @@ class CalendarCell: UITableViewCell {
     
     private func configureCell() {
         selectionStyle = .none
+        
+        backgroundColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
+            default:
+                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+            }
+        })
     }
     
     private func configureCalendarView() {

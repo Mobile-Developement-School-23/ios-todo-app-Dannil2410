@@ -29,26 +29,30 @@ class ItemViewController: UIViewController {
         return fileCache
     }()
     private var toDoItem: ToDoItem?
-    //private var tapGR: UITapGestureRecognizer?
     
     private var countRowsInSecondSection = 2
     
     private let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "d MMMM y"
+        dateFormatter.locale = Locale(identifier: "ru_RU")
         return dateFormatter
     }()
     
     //MARK: - Lifecircle
     
-    override func loadView() {
-        super.loadView()
-        
-        self.view.layer.backgroundColor = UIColor(red: 0.97, green: 0.966, blue: 0.951, alpha: 1).cgColor
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.view.layer.backgroundColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
+            default:
+                return UIColor(red: 0.97, green: 0.966, blue: 0.951, alpha: 1)
+            }
+        }).cgColor
         
         self.title = "Дело"
         
@@ -60,9 +64,22 @@ class ItemViewController: UIViewController {
         toDoItem = fileCache.items.first
         
         let tapGR = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
-        //tapGR.numberOfTapsRequired = 2
         tapGR.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGR)
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        self.view.layer.backgroundColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
+            default:
+                return UIColor(red: 0.97, green: 0.966, blue: 0.951, alpha: 1)
+            }
+        }).cgColor
     }
     
     deinit {
@@ -72,6 +89,28 @@ class ItemViewController: UIViewController {
     //MARK: - Cobfigure functions
     
     private func configureTableView() {
+        tableView.backgroundColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
+            default:
+                return UIColor(red: 0.97, green: 0.966, blue: 0.951, alpha: 1)
+            }
+        })
+        
+        tableView.separatorColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 1, green: 1, blue: 1, alpha: 0.6)
+            default:
+                return UIColor(red: 0, green: 0, blue: 0, alpha: 0.2)
+            }
+        })
+        
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
@@ -85,7 +124,6 @@ class ItemViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         
-        tableView.backgroundColor = UIColor(red: 0.97, green: 0.966, blue: 0.951, alpha: 1)
         tableView.sectionHeaderTopPadding = 0
     }
     
@@ -98,11 +136,19 @@ class ItemViewController: UIViewController {
     }
     
     private func configureNavigationItems() {
-        let leftBarButtonItem = UIBarButtonItem(title: "Отменить", style: .plain, target: nil, action: #selector(leftBarButtonItemToDo))
+        let leftBarButtonItem = UIBarButtonItem(title: "Отменить", style: .plain, target: self, action: #selector(leftBarButtonItemToDo))
         leftBarButtonItem.tintColor = UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
         
-        let rightBarButtonItem = UIBarButtonItem(title: "Сохранить", style: .plain, target: nil, action: #selector(rightBarButtonItemToDo))
-        rightBarButtonItem.tintColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+        let rightBarButtonItem = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(rightBarButtonItemToDo))
+        rightBarButtonItem.tintColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
+            default:
+                return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+            }
+        })
         rightBarButtonItem.isEnabled = false
 
         self.navigationItem.leftBarButtonItem = leftBarButtonItem
@@ -170,24 +216,37 @@ class ItemViewController: UIViewController {
     }
     
     @objc private func leftBarButtonItemToDo() {
-        
         print("Отменить")
     }
     
     @objc private func toDoIfHasText(_ notification: Notification) {
         let hasText = notification.userInfo?["hasText"] as? Bool ?? false
         if hasText {
-            navigationItem.rightBarButtonItem?.tintColor = UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
+            navigationItem.rightBarButtonItem?.tintColor = UIColor(dynamicProvider: {
+                traitCollection in
+                switch traitCollection.userInterfaceStyle {
+                case .dark:
+                    return UIColor(red: 0.039, green: 0.518, blue: 1, alpha: 1)
+                default:
+                    return UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
+                }
+            })
             navigationItem.rightBarButtonItem?.isEnabled = true
         } else {
-            navigationItem.rightBarButtonItem?.tintColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.3)
+            navigationItem.rightBarButtonItem?.tintColor = UIColor(dynamicProvider: {
+                traitCollection in
+                switch traitCollection.userInterfaceStyle {
+                case .dark:
+                    return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
+                default:
+                    return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+                }
+            })
             navigationItem.rightBarButtonItem?.isEnabled = false
         }
     }
     
     @objc func dismissKeyboard() {
-        let cell = tableView.cellForRow(at: indexPathTextCell) as! TextCell
-        cell.textView.resignFirstResponder()
         view.endEditing(true)
     }
     
@@ -216,14 +275,23 @@ extension ItemViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        if indexPath.section == 0 {
+        if indexPath == indexPathTextCell {
             //TextCell
             guard let cell = tableView.dequeueReusableCell(withIdentifier: TextCell.identifier, for: indexPath) as? TextCell else {
                 preconditionFailure("TextCell can not be dequeued")
             }
             if let toDoItem = toDoItem {
                 cell.textView.text = toDoItem.text
-                cell.textView.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+                cell.textView.textColor = UIColor(dynamicProvider: {
+                    traitCollection in
+                    switch traitCollection.userInterfaceStyle {
+                    case .dark:
+                        return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+                    default:
+                        return UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+                    }
+                })
+                
                 NotificationCenter
                     .default
                     .post(
@@ -234,53 +302,60 @@ extension ItemViewController: UITableViewDataSource {
             }
             return cell
 
-        } else if indexPath.section == 1 {
+        } else if indexPath == indexPathImportanceCell {
             //ImportanceCell
-            if indexPath.row == 0 {
-                guard let cell = tableView.dequeueReusableCell(withIdentifier: ImportanceCell.indentifier, for: indexPath) as? ImportanceCell else {
-                    preconditionFailure("ImportanceCell can not be dequeued")
-                }
-                if let toDoItem = toDoItem {
-                    cell.importanceSegmentedControl.selectedSegmentIndex = Importance.allCases.firstIndex(of: toDoItem.importance) ?? 2
-                }
-                return cell
-                
-            } else if indexPath.row == 1 {
-                //SetDeadLineCell
-                guard let cell = tableView.dequeueReusableCell(withIdentifier: SetDeadLineCell.identifier, for: indexPath) as? SetDeadLineCell else {
-                    preconditionFailure("SetDeadLineCell can not be dequeued")
-                }
-                if let toDoItem = toDoItem,
-                   let deadLine = toDoItem.deadLine {
-                    cell.deadLineLabel.text = dateFormatter.string(from: deadLine)
-                    cell.switcher.isOn = true
-                    cell.toDoIfSenderIsOn()
-                }
-                
-                cell
-                    .configureCell(
-                        dateFormatter: dateFormatter,
-                        selectedDay: nil
-                    )
-                cell.delegate = self
-                return cell
-                
-            } else if countRowsInSecondSection == 3 {
-                //CalendarCell
-                guard let cell = tableView.dequeueReusableCell(withIdentifier: CalendarCell.identifier, for: indexPath) as? CalendarCell else {
-                    preconditionFailure("CalendarCell can not be dequeued")
-                }
-                cell.delegate = self
-                return cell
-                
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: ImportanceCell.indentifier, for: indexPath) as? ImportanceCell else {
+                preconditionFailure("ImportanceCell can not be dequeued")
             }
-        } else {
+            if let toDoItem = toDoItem {
+                cell.importanceSegmentedControl.selectedSegmentIndex = Importance.allCases.firstIndex(of: toDoItem.importance) ?? 2
+            }
+            return cell
+            
+        } else if indexPath == indexPathSetDeadLineCell {
+            //SetDeadLineCell
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: SetDeadLineCell.identifier, for: indexPath) as? SetDeadLineCell else {
+                preconditionFailure("SetDeadLineCell can not be dequeued")
+            }
+            if let toDoItem = toDoItem,
+               let deadLine = toDoItem.deadLine {
+                cell.deadLineLabel.text = dateFormatter.string(from: deadLine)
+                cell.switcher.isOn = true
+                cell.toDoIfSenderIsOn()
+            }
+            
+            cell
+                .configureCell(
+                    dateFormatter: dateFormatter,
+                    selectedDay: nil
+                )
+            cell.delegate = self
+            return cell
+            
+        } else if countRowsInSecondSection == 3,
+                  indexPath == indexPathCalendarCell {
+            //CalendarCell
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: CalendarCell.identifier, for: indexPath) as? CalendarCell else {
+                preconditionFailure("CalendarCell can not be dequeued")
+            }
+            cell.delegate = self
+            return cell
+                
+        } else if indexPath == indexPathDeleteCell {
             //DeleteCell
             guard let cell = tableView.dequeueReusableCell(withIdentifier: DeleteCell.identifier, for: indexPath) as? DeleteCell else {
                 preconditionFailure("DeleteCell can not be dequeued")
             }
             if toDoItem != nil {
-                cell.deleteLabel.textColor = UIColor(red: 1, green: 0.231, blue: 0.188, alpha: 1)
+                cell.deleteLabel.textColor = UIColor(dynamicProvider: {
+                    traitCollection in
+                    switch traitCollection.userInterfaceStyle {
+                    case .dark:
+                        return UIColor(red: 1, green: 0.271, blue: 0.227, alpha: 1)
+                    default:
+                        return UIColor(red: 1, green: 0.231, blue: 0.188, alpha: 1)
+                    }
+                })
             }
             return cell
             
@@ -325,9 +400,10 @@ extension ItemViewController: UITableViewDelegate {
                 tableView.endUpdates()
             }
         } else if indexPath == indexPathDeleteCell,
-                  let cell = tableView.cellForRow(at: indexPathDeleteCell) as? DeleteCell,
-                  cell.deleteLabel.textColor == UIColor(red: 1, green: 0.231, blue: 0.188, alpha: 1),
-                  let toDoItem = self.toDoItem {
+                  let textCell = tableView.cellForRow(at: indexPathTextCell) as? TextCell,
+                  !textCell.textView.text.isEmpty,
+                  textCell.textView.text != "Что надо сделать?",
+                    let toDoItem = self.toDoItem {
             fileCache.deleteItem(for: toDoItem.id)
             do {
                 try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
@@ -335,7 +411,6 @@ extension ItemViewController: UITableViewDelegate {
                 print(error)
             }
         }
-        
     }
 }
 

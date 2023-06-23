@@ -25,7 +25,7 @@ class SetDeadLineCell: UITableViewCell {
     
     weak var delegate: SwitchCalendarHidable?
     
-    lazy var doneByLabel: UILabel = {
+    private lazy var doneByLabel: UILabel = {
         let doneByLabel = UILabel()
         doneByLabel.font = UIFont.systemFont(ofSize: 17)
         doneByLabel.text = "Сделать до"
@@ -43,7 +43,15 @@ class SetDeadLineCell: UITableViewCell {
     
     lazy var deadLineLabel: UILabel = {
        let deadLineLabel = UILabel()
-        deadLineLabel.textColor = UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
+        deadLineLabel.textColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 0.039, green: 0.518, blue: 1, alpha: 1)
+            default:
+                return UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
+            }
+        })
         deadLineLabel.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
         deadLineLabel.translatesAutoresizingMaskIntoConstraints = false
         return deadLineLabel
@@ -90,6 +98,16 @@ class SetDeadLineCell: UITableViewCell {
         selectionStyle = .none
         self.dateFormatter = dateFormatter
         self.selectedDay = selectedDay
+        
+        backgroundColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
+            default:
+                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+            }
+        })
     }
     
     private func configureDoneByLabel() {

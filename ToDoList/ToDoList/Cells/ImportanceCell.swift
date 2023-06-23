@@ -47,7 +47,15 @@ class ImportanceCell: UITableViewCell {
         importantImageView.image = UIImage(
             systemName: "exclamationmark.2",
             withConfiguration: imageConfiguration)?.withTintColor(
-                .init(red: 1.0, green: 0.23, blue: 0.19, alpha: 1.0),
+                UIColor(dynamicProvider: {
+                    traitCollection in
+                    switch traitCollection.userInterfaceStyle {
+                    case .dark:
+                        return UIColor(red: 1.0, green: 0.271, blue: 0.227, alpha: 1.0)
+                    default:
+                        return UIColor(red: 1.0, green: 0.231, blue: 0.188, alpha: 1.0)
+                    }
+                }),
                 renderingMode: .alwaysOriginal)
         return importantImageView
     }()
@@ -102,6 +110,16 @@ class ImportanceCell: UITableViewCell {
     
     private func configureCell() {
         selectionStyle = .none
+        
+        backgroundColor = UIColor(dynamicProvider: {
+            traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
+            default:
+                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+            }
+        })
     }
     
     private func configureImportanceLabel() {
