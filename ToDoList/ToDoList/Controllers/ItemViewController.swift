@@ -160,7 +160,7 @@ class ItemViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(toDoIfHasText(_:)), name: notificationHasText, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(willShowKeyboard(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(willHideKeyboard(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
@@ -253,11 +253,12 @@ class ItemViewController: UIViewController {
     @objc func willShowKeyboard(_ notification: Notification) {
         guard let info = notification.userInfo as NSDictionary?,
               let keyboardSize = info.value(forKey: UIResponder.keyboardFrameEndUserInfoKey) as? NSValue else {return}
-        
-        let keyboardHight = keyboardSize.cgRectValue.size.height
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHight, right: 0)
+
+        let keyboardHeight = keyboardSize.cgRectValue.height
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight - 35, right: 0)
+        //tableView.scrollIndicatorInsets = tableView.contentInset
     }
-    
+
     @objc func willHideKeyboard(_ notification: Notification) {
         tableView.contentInset = UIEdgeInsets.zero
     }
@@ -300,6 +301,7 @@ extension ItemViewController: UITableViewDataSource {
                         userInfo: ["hasText": true]
                     )
             }
+            cell.delegate = self
             return cell
 
         } else if indexPath == indexPathImportanceCell {
@@ -433,5 +435,17 @@ extension ItemViewController: DeadLineSettable {
             return
         }
         cell.deadLineLabel.text = dateFormatter.string(from: date.addingTimeInterval(3*60*60))
+    }
+}
+
+extension ItemViewController: TextCellHeightUpdatable {
+    func updateTextCellHeight(to height: CGFloat) {
+        guard let cell = tableView.cellForRow(at: indexPathTextCell) as? TextCell else { return }
+        
+        tableView.beginUpdates()
+        cell.textViewHeightConstraint.constant = height
+        tableView.scrollToRow(at: indexPathTextCell, at: .bottom, animated: false)
+        tableView.endUpdates()
+        
     }
 }

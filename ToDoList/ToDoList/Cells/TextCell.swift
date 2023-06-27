@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol TextCellHeightUpdatable: AnyObject {
+    func updateTextCellHeight(to height: CGFloat)
+}
+
 class TextCell: UITableViewCell {
 
     //MARK: - Properties
@@ -31,13 +35,15 @@ class TextCell: UITableViewCell {
         
         textView.text = "Что надо сделать?"
         textView.delegate = self
-        //textView.isScrollEnabled = false
+        textView.isScrollEnabled = false
         textView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(textView)
         return textView
     }()
     
-    private lazy var textViewHeightConstraint = self.textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 120)
+    lazy var textViewHeightConstraint = self.textView.heightAnchor.constraint(equalToConstant: 120)
+    
+    weak var delegate: TextCellHeightUpdatable?
     
     //MARK: - Lifeceircle
     
@@ -84,7 +90,7 @@ class TextCell: UITableViewCell {
             textView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 17),
             textView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             textView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            textView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
+            textView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             textViewHeightConstraint
         ])
     }
@@ -92,12 +98,13 @@ class TextCell: UITableViewCell {
     //MARK: fuctions for setting cornerRadius for cell
     
     private func adjustMyFrame() {
-        frame = CGRect(x: 16, y: frame.minY, width: superview!.frame.width - 32, height: frame.height)
+        guard let view = superview else { return }
+        frame = CGRect(x: 16, y: frame.minY, width: view.frame.width - 32, height: frame.height)
     }
-    
+
     private func setCorners() {
         let cornerRadius: CGFloat = 16
-        
+
         roundCorners(corners: .allCorners, radius: cornerRadius)
     }
 }
@@ -119,8 +126,9 @@ extension TextCell: UITextViewDelegate {
                 userInfo: ["hasText": textView.hasText ? true : false]
             )
         
-        textViewHeightConstraint.constant = textView.intrinsicContentSize.height < 120 ? 120 : textView.intrinsicContentSize.height
-        textView.layoutIfNeeded()
+        let size = CGSize(width: contentView.frame.width - 32, height: .infinity)
+        let estimatedSize = textView.sizeThatFits(size)
+        delegate?.updateTextCellHeight(to: estimatedSize.height > 120 ? estimatedSize.height : 120)
     }
     
     //MARK: - Make placeholder

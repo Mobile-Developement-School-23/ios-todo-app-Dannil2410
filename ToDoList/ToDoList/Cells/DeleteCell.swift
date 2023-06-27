@@ -120,7 +120,8 @@ class DeleteCell: UITableViewCell {
     //MARK: fuctions for setting cornerRadius for cell
     
     private func adjustMyFrame() {
-        frame = CGRect(x: 16, y: frame.minY, width: superview!.frame.width - 32, height: frame.height)
+        guard let view = superview else { return }
+        frame = CGRect(x: 16, y: frame.minY, width: view.frame.width - 32, height: frame.height)
     }
     
     private func setCorners() {
