@@ -43,15 +43,7 @@ class SetDeadLineCell: UITableViewCell {
     
     lazy var deadLineLabel: UILabel = {
        let deadLineLabel = UILabel()
-        deadLineLabel.textColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 0.039, green: 0.518, blue: 1, alpha: 1)
-            default:
-                return UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
-            }
-        })
+        deadLineLabel.textColor = Colors.colorBlue.value
         deadLineLabel.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
         deadLineLabel.translatesAutoresizingMaskIntoConstraints = false
         return deadLineLabel
@@ -88,7 +80,6 @@ class SetDeadLineCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        adjustMyFrame()
         setCorners()
     }
     
@@ -99,15 +90,7 @@ class SetDeadLineCell: UITableViewCell {
         self.dateFormatter = dateFormatter
         self.selectedDay = selectedDay
         
-        backgroundColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
-            default:
-                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-            }
-        })
+        backgroundColor = Colors.backSecondary.value
     }
     
     private func configureDoneByLabel() {
@@ -180,11 +163,6 @@ class SetDeadLineCell: UITableViewCell {
     }
     
     //MARK: fuctions for setting cornerRadius for cell
-    
-    private func adjustMyFrame() {
-        guard let view = superview else { return }
-        frame = CGRect(x: 16, y: frame.minY, width: view.frame.width - 32, height: frame.height)
-    }
     
     private func setCorners() {
         if calendarIsActive == false {

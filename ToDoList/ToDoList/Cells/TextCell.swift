@@ -23,19 +23,21 @@ class TextCell: UITableViewCell {
         let textView = UITextView()
         textView.backgroundColor = .clear
         textView.font = UIFont.systemFont(ofSize: 17)
-        textView.textColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
-            default:
-                return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
-            }
-        })
+        textView.textColor = Colors.labelTeritary.value
+//        UIColor(dynamicProvider: {
+//            traitCollection in
+//            switch traitCollection.userInterfaceStyle {
+//            case .dark:
+//                return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
+//            default:
+//                return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+//            }
+//        })
         
         textView.text = "Что надо сделать?"
         textView.delegate = self
         textView.isScrollEnabled = false
+        textView.textContainerInset = UIEdgeInsets(top: 17, left: 16, bottom: 16, right: 16)
         textView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(textView)
         return textView
@@ -64,7 +66,6 @@ class TextCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        adjustMyFrame()
         setCorners()
     }
     
@@ -73,34 +74,30 @@ class TextCell: UITableViewCell {
     private func configureCell() {
         selectionStyle = .none
         
-        backgroundColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
-            default:
-                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-            }
-        })
+        backgroundColor = Colors.backSecondary.value
+//        UIColor(dynamicProvider: {
+//            traitCollection in
+//            switch traitCollection.userInterfaceStyle {
+//            case .dark:
+//                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
+//            default:
+//                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+//            }
+//        })
 
     }
     
     private func configureTextView() {
         NSLayoutConstraint.activate([
-            textView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 17),
-            textView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            textView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            textView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            textView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            textView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            textView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            textView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             textViewHeightConstraint
         ])
     }
     
     //MARK: fuctions for setting cornerRadius for cell
-    
-    private func adjustMyFrame() {
-        guard let view = superview else { return }
-        frame = CGRect(x: 16, y: frame.minY, width: view.frame.width - 32, height: frame.height)
-    }
 
     private func setCorners() {
         let cornerRadius: CGFloat = 16
@@ -136,30 +133,32 @@ extension TextCell: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.text == "Что надо сделать?" {
             textView.text = nil
-            textView.textColor = UIColor(dynamicProvider: {
-                traitCollection in
-                switch traitCollection.userInterfaceStyle {
-                case .dark:
-                    return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-                default:
-                    return UIColor(red: 0, green: 0, blue: 0, alpha: 1)
-                }
-            })
+            textView.textColor = Colors.labelPrimary.value
+//            UIColor(dynamicProvider: {
+//                traitCollection in
+//                switch traitCollection.userInterfaceStyle {
+//                case .dark:
+//                    return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+//                default:
+//                    return UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+//                }
+//            })
             
         }
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
         if !textView.hasText {
-            textView.textColor = UIColor(dynamicProvider: {
-                traitCollection in
-                switch traitCollection.userInterfaceStyle {
-                case .dark:
-                    return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
-                default:
-                    return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
-                }
-            })
+            textView.textColor = Colors.labelTeritary.value
+//            UIColor(dynamicProvider: {
+//                traitCollection in
+//                switch traitCollection.userInterfaceStyle {
+//                case .dark:
+//                    return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
+//                default:
+//                    return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+//                }
+//            })
             
             textView.text = "Что надо сделать?"
         }

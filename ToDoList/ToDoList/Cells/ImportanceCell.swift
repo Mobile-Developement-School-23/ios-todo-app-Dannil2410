@@ -21,21 +21,21 @@ class ImportanceCell: UITableViewCell {
         return importance
     }()
     
-    private lazy var commonImageView: UIImageView = {
+    private lazy var unimortantImageView: UIImageView = {
         let commonImageView = UIImageView()
         let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 14, weight: .bold, scale: .large)
         commonImageView.image = UIImage(
             systemName: "arrow.down",
             withConfiguration: imageConfiguration)?.withTintColor(
-                .init(red: 0.56, green: 0.56, blue: 0.58, alpha: 1.0),
+                Colors.colorGray.value,
                 renderingMode: .alwaysOriginal)
         return commonImageView
     }()
     
-    private lazy var unimportantLabel: UILabel = {
+    private lazy var commonLabel: UILabel = {
        let unimportantLabel = UILabel()
         unimportantLabel.text = "нет"
-        unimportantLabel.tintColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
+        unimportantLabel.tintColor = Colors.labelPrimary.value
         unimportantLabel.font = UIFont.systemFont(ofSize: 15)
         unimportantLabel.textAlignment = .center
         return unimportantLabel
@@ -47,22 +47,14 @@ class ImportanceCell: UITableViewCell {
         importantImageView.image = UIImage(
             systemName: "exclamationmark.2",
             withConfiguration: imageConfiguration)?.withTintColor(
-                UIColor(dynamicProvider: {
-                    traitCollection in
-                    switch traitCollection.userInterfaceStyle {
-                    case .dark:
-                        return UIColor(red: 1.0, green: 0.271, blue: 0.227, alpha: 1.0)
-                    default:
-                        return UIColor(red: 1.0, green: 0.231, blue: 0.188, alpha: 1.0)
-                    }
-                }),
+                Colors.colorRed.value,
                 renderingMode: .alwaysOriginal)
         return importantImageView
     }()
     
     lazy var importanceSegmentedControl: UISegmentedControl = {
-        guard let commonImage = commonImageView.image,
-              let unimportantText = unimportantLabel.text,
+        guard let commonImage = unimortantImageView.image,
+              let unimportantText = commonLabel.text,
               let importantImage = importantImageView.image else {
             return UISegmentedControl()
         }
@@ -75,7 +67,7 @@ class ImportanceCell: UITableViewCell {
         
         importanceSegmentedControl.layer.masksToBounds = false
         importanceSegmentedControl.layer.cornerRadius = 8.91
-        importanceSegmentedControl.backgroundColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.06)
+        importanceSegmentedControl.backgroundColor = Colors.supportOverlay.value
         
         importanceSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
         return importanceSegmentedControl
@@ -102,7 +94,6 @@ class ImportanceCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        adjustMyFrame()
         setCorners()
     }
     
@@ -111,15 +102,7 @@ class ImportanceCell: UITableViewCell {
     private func configureCell() {
         selectionStyle = .none
         
-        backgroundColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
-            default:
-                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-            }
-        })
+        backgroundColor = Colors.backSecondary.value
     }
     
     private func configureImportanceLabel() {
@@ -144,11 +127,6 @@ class ImportanceCell: UITableViewCell {
     }
     
     //MARK: fuctions for setting cornerRadius for cell
-    
-    private func adjustMyFrame() {
-        guard let view = superview else { return }
-        frame = CGRect(x: 16, y: frame.minY, width: view.frame.width - 32, height: frame.height)
-    }
     
     private func setCorners() {
         let cornerRadius: CGFloat = 16

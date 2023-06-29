@@ -13,6 +13,10 @@
 		C83C12242A42FD9100950448 /* CalendarCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12232A42FD9100950448 /* CalendarCell.swift */; };
 		C83C12262A432F5F00950448 /* DeleteCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12252A432F5F00950448 /* DeleteCell.swift */; };
 		C83C12282A4380D400950448 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12272A4380D400950448 /* UIViewExtension.swift */; };
+		C83C12762A4AC05100950448 /* ItemsListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12752A4AC05100950448 /* ItemsListViewController.swift */; };
+		C83C12782A4AD15800950448 /* ShowOrHideControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12772A4AD15800950448 /* ShowOrHideControl.swift */; };
+		C83C127A2A4ADE8D00950448 /* HeaderForSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C12792A4ADE8D00950448 /* HeaderForSectionView.swift */; };
+		C83C127C2A4AE9D900950448 /* ItemListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C127B2A4AE9D900950448 /* ItemListCell.swift */; };
 		C8686A7B2A375561000C9CF3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A7A2A375561000C9CF3 /* AppDelegate.swift */; };
 		C8686A7D2A375561000C9CF3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A7C2A375561000C9CF3 /* SceneDelegate.swift */; };
 		C8686A7F2A375561000C9CF3 /* ItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A7E2A375561000C9CF3 /* ItemViewController.swift */; };
@@ -24,6 +28,8 @@
 		C8686A9F2A375563000C9CF3 /* ToDoListUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A9E2A375563000C9CF3 /* ToDoListUITests.swift */; };
 		C8686AA12A375563000C9CF3 /* ToDoListUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686AA02A375563000C9CF3 /* ToDoListUITestsLaunchTests.swift */; };
 		C8686AAE2A375587000C9CF3 /* ToDoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686AAD2A375587000C9CF3 /* ToDoItem.swift */; };
+		C89556022A4D607900BC557C /* AddNewItemControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89556012A4D607900BC557C /* AddNewItemControl.swift */; };
+		C89556062A4D953900BC557C /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89556052A4D953900BC557C /* Colors.swift */; };
 		C8CE8DF82A389472002A2A00 /* FileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CE8DF72A389472002A2A00 /* FileCache.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,6 +57,10 @@
 		C83C12232A42FD9100950448 /* CalendarCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarCell.swift; sourceTree = "<group>"; };
 		C83C12252A432F5F00950448 /* DeleteCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteCell.swift; sourceTree = "<group>"; };
 		C83C12272A4380D400950448 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
+		C83C12752A4AC05100950448 /* ItemsListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemsListViewController.swift; sourceTree = "<group>"; };
+		C83C12772A4AD15800950448 /* ShowOrHideControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowOrHideControl.swift; sourceTree = "<group>"; };
+		C83C12792A4ADE8D00950448 /* HeaderForSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderForSectionView.swift; sourceTree = "<group>"; };
+		C83C127B2A4AE9D900950448 /* ItemListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemListCell.swift; sourceTree = "<group>"; };
 		C8686A772A375561000C9CF3 /* ToDoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8686A7A2A375561000C9CF3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C8686A7C2A375561000C9CF3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -66,6 +76,8 @@
 		C8686A9E2A375563000C9CF3 /* ToDoListUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListUITests.swift; sourceTree = "<group>"; };
 		C8686AA02A375563000C9CF3 /* ToDoListUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		C8686AAD2A375587000C9CF3 /* ToDoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItem.swift; sourceTree = "<group>"; };
+		C89556012A4D607900BC557C /* AddNewItemControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNewItemControl.swift; sourceTree = "<group>"; };
+		C89556052A4D953900BC557C /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		C8CE8DF72A389472002A2A00 /* FileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -102,6 +114,7 @@
 				C83C121E2A41E5D200950448 /* SetDeadLineCell.swift */,
 				C83C12232A42FD9100950448 /* CalendarCell.swift */,
 				C83C12252A432F5F00950448 /* DeleteCell.swift */,
+				C83C127B2A4AE9D900950448 /* ItemListCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -117,6 +130,8 @@
 		C83C122D2A44996D00950448 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				C83C12752A4AC05100950448 /* ItemsListViewController.swift */,
+				C89556072A4DB8DD00BC557C /* AdditionalsForItemsListVC */,
 				C8686A7E2A375561000C9CF3 /* ItemViewController.swift */,
 			);
 			path = Controllers;
@@ -150,6 +165,7 @@
 				C83C12102A40E1FA00950448 /* Cells */,
 				C83C122D2A44996D00950448 /* Controllers */,
 				C83C12292A4380DB00950448 /* Extensions */,
+				C89556092A4DB97C00BC557C /* Colors */,
 				C8686A7A2A375561000C9CF3 /* AppDelegate.swift */,
 				C8686A7C2A375561000C9CF3 /* SceneDelegate.swift */,
 				C8686A802A375561000C9CF3 /* Main.storyboard */,
@@ -176,6 +192,24 @@
 				C8686AA02A375563000C9CF3 /* ToDoListUITestsLaunchTests.swift */,
 			);
 			path = ToDoListUITests;
+			sourceTree = "<group>";
+		};
+		C89556072A4DB8DD00BC557C /* AdditionalsForItemsListVC */ = {
+			isa = PBXGroup;
+			children = (
+				C89556012A4D607900BC557C /* AddNewItemControl.swift */,
+				C83C12792A4ADE8D00950448 /* HeaderForSectionView.swift */,
+				C83C12772A4AD15800950448 /* ShowOrHideControl.swift */,
+			);
+			path = AdditionalsForItemsListVC;
+			sourceTree = "<group>";
+		};
+		C89556092A4DB97C00BC557C /* Colors */ = {
+			isa = PBXGroup;
+			children = (
+				C89556052A4D953900BC557C /* Colors.swift */,
+			);
+			path = Colors;
 			sourceTree = "<group>";
 		};
 		C8CE8E0C2A3C5A98002A2A00 /* Model */ = {
@@ -333,8 +367,14 @@
 				C83C121F2A41E5D200950448 /* SetDeadLineCell.swift in Sources */,
 				C83C12242A42FD9100950448 /* CalendarCell.swift in Sources */,
 				C8686A7D2A375561000C9CF3 /* SceneDelegate.swift in Sources */,
+				C83C127C2A4AE9D900950448 /* ItemListCell.swift in Sources */,
 				C83C12282A4380D400950448 /* UIViewExtension.swift in Sources */,
+				C83C127A2A4ADE8D00950448 /* HeaderForSectionView.swift in Sources */,
+				C89556062A4D953900BC557C /* Colors.swift in Sources */,
+				C83C12782A4AD15800950448 /* ShowOrHideControl.swift in Sources */,
 				C8CE8DF82A389472002A2A00 /* FileCache.swift in Sources */,
+				C83C12762A4AC05100950448 /* ItemsListViewController.swift in Sources */,
+				C89556022A4D607900BC557C /* AddNewItemControl.swift in Sources */,
 				C83C12262A432F5F00950448 /* DeleteCell.swift in Sources */,
 				C8686A852A375561000C9CF3 /* ToDoList.xcdatamodeld in Sources */,
 			);

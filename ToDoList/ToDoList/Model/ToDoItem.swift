@@ -8,8 +8,8 @@
 import Foundation
 
 enum Importance: String, CaseIterable {
-    case common = "обычная"
     case unimportant = "неважная"
+    case common = "обычная"
     case important = "важная"
     }
 

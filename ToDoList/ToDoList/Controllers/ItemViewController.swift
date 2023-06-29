@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol TableViewRowAppendable: AnyObject {
+    func updateTableView(showOrHideAncestor: ShowAction)
+}
+
 class ItemViewController: UIViewController {
     
     //MARK: - Properties
@@ -19,17 +23,6 @@ class ItemViewController: UIViewController {
     private let indexPathCalendarCell = IndexPath(row: 2, section: 1)
     private let indexPathDeleteCell = IndexPath(row: 0, section: 2)
     
-    private lazy var fileCache: FileCache = {
-        let fileCache = FileCache()
-        do {
-            try fileCache.loadItemsFromFileSystem(fileName: "test", type: .json)
-        } catch let error {
-            print(error)
-        }
-        return fileCache
-    }()
-    private var toDoItem: ToDoItem?
-    
     private var countRowsInSecondSection = 2
     
     private let dateFormatter: DateFormatter = {
@@ -39,20 +32,21 @@ class ItemViewController: UIViewController {
         return dateFormatter
     }()
     
+    var fileCache: FileCache?
+    
+    var toDoItem: ToDoItem?
+    
+    //private var wasDone: Bool = false
+    var showOrHideAncestor: ShowAction = .hide
+    
+    weak var delegate: TableViewRowAppendable?
+    
     //MARK: - Lifecircle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.layer.backgroundColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
-            default:
-                return UIColor(red: 0.97, green: 0.966, blue: 0.951, alpha: 1)
-            }
-        }).cgColor
+        self.view.layer.backgroundColor = Colors.backPrimary.value.cgColor
         
         self.title = "Дело"
         
@@ -60,8 +54,6 @@ class ItemViewController: UIViewController {
         registrationTableViewCells()
         configureNavigationItems()
         configureWorkWithNotificationCenter()
-        
-        toDoItem = fileCache.items.first
         
         let tapGR = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
         tapGR.cancelsTouchesInView = false
@@ -71,15 +63,7 @@ class ItemViewController: UIViewController {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
-        self.view.layer.backgroundColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
-            default:
-                return UIColor(red: 0.97, green: 0.966, blue: 0.951, alpha: 1)
-            }
-        }).cgColor
+        self.view.layer.backgroundColor = Colors.backPrimary.value.cgColor
     }
     
     deinit {
@@ -89,25 +73,9 @@ class ItemViewController: UIViewController {
     //MARK: - Cobfigure functions
     
     private func configureTableView() {
-        tableView.backgroundColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
-            default:
-                return UIColor(red: 0.97, green: 0.966, blue: 0.951, alpha: 1)
-            }
-        })
+        tableView.backgroundColor = .clear
         
-        tableView.separatorColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 1, green: 1, blue: 1, alpha: 0.6)
-            default:
-                return UIColor(red: 0, green: 0, blue: 0, alpha: 0.2)
-            }
-        })
+        tableView.separatorColor = Colors.supportSeparator.value
         
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
@@ -116,9 +84,9 @@ class ItemViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
         
         tableView.dataSource = self
@@ -137,18 +105,10 @@ class ItemViewController: UIViewController {
     
     private func configureNavigationItems() {
         let leftBarButtonItem = UIBarButtonItem(title: "Отменить", style: .plain, target: self, action: #selector(leftBarButtonItemToDo))
-        leftBarButtonItem.tintColor = UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
+        leftBarButtonItem.tintColor = Colors.colorBlue.value
         
         let rightBarButtonItem = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(rightBarButtonItemToDo))
-        rightBarButtonItem.tintColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
-            default:
-                return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
-            }
-        })
+        rightBarButtonItem.tintColor = Colors.labelTeritary.value
         rightBarButtonItem.isEnabled = false
 
         self.navigationItem.leftBarButtonItem = leftBarButtonItem
@@ -168,13 +128,11 @@ class ItemViewController: UIViewController {
     
     @objc private func rightBarButtonItemToDo() {
         gatherToDoItem()
-        if let toDoItem = toDoItem {
+        if let toDoItem = toDoItem,
+           let fileCache = fileCache {
             fileCache.appendItem(toDoItem)
-        }
-        do {
-            try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
-        } catch let error {
-            print(error)
+            delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor)
+            self.dismiss(animated: true)
         }
     }
     
@@ -189,21 +147,48 @@ class ItemViewController: UIViewController {
         var startTime: Double?
         var changeTime: Double?
         var deadLine: Double?
-        if let toDoItem = toDoItem {
-            id = toDoItem.id
-            startTime = toDoItem.startTime.timeIntervalSince1970
-        }
+        
         let text = textCell.textView.text
         let importance = Importance.allCases[importanceCell.importanceSegmentedControl.selectedSegmentIndex]
+        
+        if let deadLineString = setDeadLineCell.deadLineLabel.text {
+            deadLine = dateFormatter.date(from: deadLineString)?.timeIntervalSince1970
+        }
+
+        if let toDoItem = toDoItem {
+            // если поля не поменялись, то ничего не делаем
+            if toDoItem.isDone,
+               toDoItem.text == text,
+               toDoItem.importance == importance,
+               deadLine == nil { return } else if toDoItem.isDone {
+                   // презентовать action с вопросом, хотите ли возобновить данную задачу с новыми параметрами?
+                   print("хотите ли возобновить данную задачу с новыми параметрами?")
+//                   let alertController = UIAlertController(title: "Дело", message: "Вы уверены, что хотите восстановить данное дело с новыми параметрами?", preferredStyle: .alert)
+//
+//                   let okAction = UIAlertAction(title: "Ok", style: .default, handler: { [weak self] _ in
+//                       guard let self = self else { return }
+//                       print("kek")
+//                   })
+//
+//                   alertController.addAction(okAction)
+//
+//                   let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+//
+//                   alertController.addAction(cancelAction)
+//
+//                   self.present(alertController, animated: true)
+               }
+            // если да, то обновляем startTime и делаем задачу isDone = false
+            id = toDoItem.id
+            startTime = toDoItem.isDone ? nil : toDoItem.startTime.timeIntervalSince1970
+        }
+        
         let isDone = false
         
         if startTime != nil {
             changeTime = Date.now.timeIntervalSince1970
         }
-
-        if let deadLineString = setDeadLineCell.deadLineLabel.text {
-            deadLine = dateFormatter.date(from: deadLineString)?.timeIntervalSince1970
-        }
+        
         self.toDoItem = ToDoItem(
             id: id ?? UUID().uuidString,
             text: text ?? "",
@@ -217,31 +202,16 @@ class ItemViewController: UIViewController {
     
     @objc private func leftBarButtonItemToDo() {
         print("Отменить")
+        self.dismiss(animated: true)
     }
     
     @objc private func toDoIfHasText(_ notification: Notification) {
         let hasText = notification.userInfo?["hasText"] as? Bool ?? false
         if hasText {
-            navigationItem.rightBarButtonItem?.tintColor = UIColor(dynamicProvider: {
-                traitCollection in
-                switch traitCollection.userInterfaceStyle {
-                case .dark:
-                    return UIColor(red: 0.039, green: 0.518, blue: 1, alpha: 1)
-                default:
-                    return UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
-                }
-            })
+            navigationItem.rightBarButtonItem?.tintColor = Colors.colorBlue.value
             navigationItem.rightBarButtonItem?.isEnabled = true
         } else {
-            navigationItem.rightBarButtonItem?.tintColor = UIColor(dynamicProvider: {
-                traitCollection in
-                switch traitCollection.userInterfaceStyle {
-                case .dark:
-                    return UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
-                default:
-                    return UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
-                }
-            })
+            navigationItem.rightBarButtonItem?.tintColor = Colors.labelTeritary.value
             navigationItem.rightBarButtonItem?.isEnabled = false
         }
     }
@@ -256,7 +226,6 @@ class ItemViewController: UIViewController {
 
         let keyboardHeight = keyboardSize.cgRectValue.height
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight - 35, right: 0)
-        //tableView.scrollIndicatorInsets = tableView.contentInset
     }
 
     @objc func willHideKeyboard(_ notification: Notification) {
@@ -283,15 +252,7 @@ extension ItemViewController: UITableViewDataSource {
             }
             if let toDoItem = toDoItem {
                 cell.textView.text = toDoItem.text
-                cell.textView.textColor = UIColor(dynamicProvider: {
-                    traitCollection in
-                    switch traitCollection.userInterfaceStyle {
-                    case .dark:
-                        return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-                    default:
-                        return UIColor(red: 0, green: 0, blue: 0, alpha: 1)
-                    }
-                })
+                cell.textView.textColor = Colors.labelPrimary.value
                 
                 NotificationCenter
                     .default
@@ -349,15 +310,7 @@ extension ItemViewController: UITableViewDataSource {
                 preconditionFailure("DeleteCell can not be dequeued")
             }
             if toDoItem != nil {
-                cell.deleteLabel.textColor = UIColor(dynamicProvider: {
-                    traitCollection in
-                    switch traitCollection.userInterfaceStyle {
-                    case .dark:
-                        return UIColor(red: 1, green: 0.271, blue: 0.227, alpha: 1)
-                    default:
-                        return UIColor(red: 1, green: 0.231, blue: 0.188, alpha: 1)
-                    }
-                })
+                cell.deleteLabel.textColor = Colors.colorRed.value
             }
             return cell
             
@@ -404,14 +357,12 @@ extension ItemViewController: UITableViewDelegate {
         } else if indexPath == indexPathDeleteCell,
                   let textCell = tableView.cellForRow(at: indexPathTextCell) as? TextCell,
                   !textCell.textView.text.isEmpty,
-                  textCell.textView.text != "Что надо сделать?",
-                    let toDoItem = self.toDoItem {
-            fileCache.deleteItem(for: toDoItem.id)
-            do {
-                try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
-            } catch let error {
-                print(error)
+                  textCell.textView.text != "Что надо сделать?" {
+            if let toDoItem = self.toDoItem {
+                fileCache?.deleteItem(for: toDoItem.id)
+                delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor)
             }
+            self.dismiss(animated: true)
         }
     }
 }
@@ -444,8 +395,7 @@ extension ItemViewController: TextCellHeightUpdatable {
         
         tableView.beginUpdates()
         cell.textViewHeightConstraint.constant = height
-        tableView.scrollToRow(at: indexPathTextCell, at: .bottom, animated: false)
         tableView.endUpdates()
-        
+        tableView.scrollToRow(at: indexPathTextCell, at: .bottom, animated: false)
     }
 }

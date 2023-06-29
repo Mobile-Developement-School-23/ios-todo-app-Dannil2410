@@ -56,7 +56,6 @@ class CalendarCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        adjustMyFrame()
         setCorners()
     }
     
@@ -65,15 +64,7 @@ class CalendarCell: UITableViewCell {
     private func configureCell() {
         selectionStyle = .none
         
-        backgroundColor = UIColor(dynamicProvider: {
-            traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(red: 0.145, green: 0.145, blue: 0.155, alpha: 1)
-            default:
-                return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-            }
-        })
+        backgroundColor = Colors.backSecondary.value
     }
     
     private func configureCalendarView() {
@@ -89,11 +80,6 @@ class CalendarCell: UITableViewCell {
     }
     
     //MARK: fuctions for setting cornerRadius for cell
-    
-    private func adjustMyFrame() {
-        guard let view = superview else { return }
-        frame = CGRect(x: 16, y: frame.minY, width: view.frame.width - 32, height: frame.height)
-    }
     
     private func setCorners() {
         let cornerRadius: CGFloat = 16
