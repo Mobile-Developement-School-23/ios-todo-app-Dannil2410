@@ -302,6 +302,19 @@ extension ItemsListViewController: ShowOrHideMakable {
         switch action {
         case .hide:
             showOrHide = .hide
+            var itemsIsDoneWithDeadLine = fileCache.items.filter({$0.isDone == true})
+            for index in 0..<itemsIsDoneWithDeadLine.count {
+                let item = itemsIsDoneWithDeadLine[index]
+                itemsIsDoneWithDeadLine[index] = ToDoItem(
+                    id: item.id,
+                    text: item.text,
+                    importance: item.importance,
+                    deadLineTimeIntervalSince1970: nil,
+                    isDone: item.isDone,
+                    startTimeIntervalSince1970: item.startTime.timeIntervalSince1970,
+                    changeTimeIntervalSince1970: item.changeTime?.timeIntervalSince1970)
+                fileCache.appendItem(itemsIsDoneWithDeadLine[index])
+            }
             items = fileCache.items.sorted { $0.startTime > $1.startTime}
         case .show:
             showOrHide = .show
@@ -323,11 +336,15 @@ extension ItemsListViewController: NewItemThroughCircleAddable {
 
 extension ItemsListViewController: ItemIsDoneChangable {
     func itemIsDoneChanged(item: ToDoItem) {
+        var deadlineTimeIntervalSince1970: Double?
+        if let deadLine = item.deadLine?.timeIntervalSince1970 {
+            deadlineTimeIntervalSince1970 = Date.now.timeIntervalSince1970 > deadLine ? nil : deadLine
+        }
         let updateItem = ToDoItem(
             id: item.id,
             text: item.text,
             importance: item.importance,
-            deadLineTimeIntervalSince1970: nil,
+            deadLineTimeIntervalSince1970: deadlineTimeIntervalSince1970,
             isDone: item.isDone ? false: true,
             startTimeIntervalSince1970: Date.now.timeIntervalSince1970,
             changeTimeIntervalSince1970: nil)
@@ -337,13 +354,10 @@ extension ItemsListViewController: ItemIsDoneChangable {
         self.items[currentItemIndex ?? 0] = updateItem
         guard let cell = tableView.cellForRow(at: IndexPath(row: currentItemIndex ?? 0, section: 0)) as? ItemListCell else { return }
 
-        cell.configureCell(
-            rowInSection: 1+rowsCount,
-            currentRow: currentItemIndex ?? 0,
-            hasDeadLine: false,
-            lastCell: rowsCount - (currentItemIndex ?? 0) == 0)
-        cell.configureBriefText(item: updateItem)
-        cell.configureDeadLineText(deadLine: updateItem.deadLine, dateFormatter: dateFormatter)
-        cell.layoutIfNeeded()
+        if showOrHide == .show {
+            cell.item = updateItem
+        } else {
+            cell.configureBriefText(item: updateItem)
+        }
     }
 }

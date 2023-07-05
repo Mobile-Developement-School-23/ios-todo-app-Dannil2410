@@ -60,7 +60,7 @@ class ItemListCell: UITableViewCell {
         return doneItemButton
     }()
 
-    private var item: ToDoItem?
+    var item: ToDoItem?
 
     var hidesTopSeparator = false
     var hidesBottomSeparator = false
@@ -122,13 +122,7 @@ class ItemListCell: UITableViewCell {
     }
 
     // MARK: - Configure functions
-    override func prepareForReuse() {
-        super.prepareForReuse()
 
-        if hidesBottomSeparator {
-            configureBriefTextDefault()
-        }
-    }
     func configureCell(rowInSection: Int, currentRow: Int, hasDeadLine: Bool, lastCell: Bool) {
         self.rowInSection = rowInSection
         self.cellType = currentRow == 0 ? .first : currentRow + 1 == rowInSection ? .last : .common
@@ -253,7 +247,7 @@ class ItemListCell: UITableViewCell {
                 .withTintColor(
                     Colors.labelTeritary.value,
                     renderingMode: .alwaysOriginal)
-            let deadLineString = NSMutableAttributedString(string:  "")
+            let deadLineString = NSMutableAttributedString(string: "")
             deadLineString.append(NSAttributedString(attachment: deadLineAttachment))
             deadLineString.append(NSAttributedString(string: " " + dateFormatter.string(from: deadLine)))
             deadLineLabel.attributedText = deadLineString
