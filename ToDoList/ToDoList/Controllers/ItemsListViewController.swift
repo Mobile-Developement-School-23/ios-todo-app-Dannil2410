@@ -36,6 +36,10 @@ class ItemsListViewController: UIViewController {
 
     private var isPortrait: Bool = true
 
+    private let networkService = DefaultNetworkingService(
+        deviceId: UIDevice.current.identifierForVendor?.uuidString ?? ""
+    )
+
     // MARK: - Lifecircle
 
     override func viewDidLoad() {
@@ -47,13 +51,6 @@ class ItemsListViewController: UIViewController {
         configureTableView()
         configureAddNewItemControl()
 
-        do {
-            try fileCache.loadItemsFromFileSystem(fileName: "test", type: .json)
-            items = fileCache.items.filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime}
-        } catch let error {
-            print(error)
-        }
-
         NotificationCenter
             .default
             .addObserver(
@@ -62,14 +59,39 @@ class ItemsListViewController: UIViewController {
                 name: UIApplication.didEnterBackgroundNotification,
                 object: nil)
 
+        do {
+            try fileCache.loadItemsFromFileSystem(fileName: "test", type: .json)
+            items = fileCache.items.filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime}
+        } catch let error {
+            print(error)
+        }
+
+        Task {
+            do {
+                let list = try await networkService.fetchItems()
+                items = list.filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime}
+                await MainActor.run(body: { self.tableView.reloadData()})
+                print(list)
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
         print(#function)
     }
 
     @objc private func saveItems() {
-        do {
-            try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
-        } catch let error {
-            print(error)
+//        do {
+//            try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
+//        } catch let error {
+//            print(error)
+//        }
+        Task {
+            do {
+                let result = try await networkService.patch(for: fileCache.items)
+                print(result)
+            } catch let error {
+                print(error)
+            }
         }
     }
 
@@ -230,7 +252,10 @@ extension ItemsListViewController: UITableViewDataSource {
         return UISwipeActionsConfiguration(actions: [action])
     }
 
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(
+        _ tableView: UITableView,
+        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration? {
         let action = UIContextualAction(style: .destructive, title: "")
         { [weak self] (action, view, completionHandler) in
             guard let self = self else { return }

@@ -155,6 +155,13 @@ class ItemViewController: UIViewController {
                flag == 0 {
                 fileCache.appendItem(toDoItem)
                 delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor)
+//                Task {
+//                    do {
+//                        let result = try await
+//                    } catch let error {
+//                        print(error)
+//                    }
+//                }
                 self.dismiss(animated: true)
             }
         } else {
@@ -358,7 +365,7 @@ extension ItemViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         if indexPath == indexPathTextCell {
-            //TextCell
+
             guard let cell = tableView.dequeueReusableCell(withIdentifier: TextCell.identifier, for: indexPath) as? TextCell else {
                 preconditionFailure("TextCell can not be dequeued")
             }
@@ -378,7 +385,7 @@ extension ItemViewController: UITableViewDataSource {
             return cell
 
         } else if indexPath == indexPathImportanceCell {
-            //ImportanceCell
+
             guard let cell = tableView.dequeueReusableCell(withIdentifier: ImportanceCell.indentifier, for: indexPath) as? ImportanceCell else {
                 preconditionFailure("ImportanceCell can not be dequeued")
             }
@@ -390,7 +397,7 @@ extension ItemViewController: UITableViewDataSource {
             return cell
 
         } else if indexPath == indexPathSetDeadLineCell {
-            //SetDeadLineCell
+
             guard let cell = tableView.dequeueReusableCell(withIdentifier: SetDeadLineCell.identifier, for: indexPath) as? SetDeadLineCell else {
                 preconditionFailure("SetDeadLineCell can not be dequeued")
             }
@@ -412,7 +419,7 @@ extension ItemViewController: UITableViewDataSource {
 
         } else if countRowsInSecondSection == 3,
                   indexPath == indexPathCalendarCell {
-            //CalendarCell
+
             guard let cell = tableView.dequeueReusableCell(withIdentifier: CalendarCell.identifier, for: indexPath) as? CalendarCell else {
                 preconditionFailure("CalendarCell can not be dequeued")
             }
@@ -421,7 +428,7 @@ extension ItemViewController: UITableViewDataSource {
             return cell
 
         } else if indexPath == indexPathDeleteCell {
-            //DeleteCell
+
             guard let cell = tableView.dequeueReusableCell(withIdentifier: DeleteCell.identifier, for: indexPath) as? DeleteCell else {
                 preconditionFailure("DeleteCell can not be dequeued")
             }
@@ -481,15 +488,6 @@ extension ItemViewController: UITableViewDelegate {
             self.dismiss(animated: true)
         }
     }
-
-    override func willRotate(to toInterfaceOrientation: UIInterfaceOrientation, duration: TimeInterval) {
-        super.willRotate(to: toInterfaceOrientation, duration: duration)
-
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TextCell.identifier, for: indexPathTextCell) as? TextCell else {
-            preconditionFailure("TextCell can not be dequeued")
-        }
-        cell.textView.becomeFirstResponder()
-    }
 }
 
 extension ItemViewController: SwitchCalendarHidable {
@@ -517,7 +515,7 @@ extension ItemViewController: DeadLineSettable {
 extension ItemViewController: TextCellHeightUpdatable {
     func updateTextCellHeight(to height: CGFloat) {
         guard let cell = tableView.cellForRow(at: indexPathTextCell) as? TextCell else { return }
-        
+
         tableView.beginUpdates()
         cell.textViewHeightConstraint.constant = height
         tableView.endUpdates()

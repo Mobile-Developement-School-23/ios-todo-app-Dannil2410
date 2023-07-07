@@ -8,9 +8,9 @@
 import Foundation
 
 enum Importance: String, CaseIterable {
-    case unimportant = "неважная"
-    case common = "обычная"
-    case important = "важная"
+    case unimportant = "low"
+    case common = "basic"
+    case important = "important"
     }
 
 struct ToDoItem {
@@ -23,14 +23,22 @@ struct ToDoItem {
     let changeTime: Date?
     static let splitter: String = ","
     static let elementsOrder: String = "id,text,importance,deadLine,isDone,startTime,changeTime"
-    
-    init(id: String = UUID().uuidString, text: String, importance: Importance, deadLineTimeIntervalSince1970: Double?, isDone: Bool, startTimeIntervalSince1970: Double, changeTimeIntervalSince1970: Double?) {
-        
+
+    init(
+        id: String = UUID().uuidString,
+        text: String,
+        importance: Importance,
+        deadLineTimeIntervalSince1970: Double?,
+        isDone: Bool,
+        startTimeIntervalSince1970: Double,
+        changeTimeIntervalSince1970: Double?
+    ) {
+
         self.id = id
         self.text = text
-        
+
         self.importance = importance
-        
+
         if let deadLine = deadLineTimeIntervalSince1970 {
             self.deadLine = Date(timeIntervalSince1970: deadLine)
         } else {
@@ -38,20 +46,20 @@ struct ToDoItem {
         }
         self.isDone = isDone
         self.startTime = Date(timeIntervalSince1970: startTimeIntervalSince1970)
-        
+
         if let changeTime = changeTimeIntervalSince1970 {
             self.changeTime = Date(timeIntervalSince1970: changeTime)
         } else {
             self.changeTime = nil
         }
-        
+
     }
 }
 
 extension ToDoItem {
-    
-    //MARK: - Work with JSON format
-    
+
+    // MARK: - Work with JSON format
+
     var json: Any {
         var jsonDict = [String: Any]()
         jsonDict["id"] = self.id
@@ -67,31 +75,29 @@ extension ToDoItem {
         }
         return jsonDict
     }
-    
+
     static func parse(json: Any) -> ToDoItem? {
         if let jsonDict = json as? [String: Any],
            let text = jsonDict["text"] as? String,
-           let startTime = jsonDict["startTime"] as? Double
-        {
+           let startTime = jsonDict["startTime"] as? Double {
             let id = jsonDict["id"] as? String ?? UUID().uuidString
             let isDone = jsonDict["isDone"] as? Bool
             let deadLine = jsonDict["deadLine"] as? Double
             let changeTime = jsonDict["changeTime"] as? Double
-            
+
             let importanceString = jsonDict["importance"] as? String
-            let importanceEnum = importanceString == "важная" ? Importance.important : (importanceString == "неважная" ? Importance.unimportant : Importance.common)
-            
+            let importanceEnum = importanceString == "important" ? Importance.important : (importanceString == "low" ? Importance.unimportant : Importance.common)
+
             if let deadLine = deadLine,
                startTime >= deadLine { return nil }
-            
+
             if let changeTime = changeTime,
                startTime >= changeTime { return nil }
-            
+
             if let deadLine = deadLine,
                let changeTime = changeTime,
                changeTime >= deadLine { return nil }
-               
-            
+
             return ToDoItem(id: id,
                             text: text,
                             importance: importanceEnum,
@@ -105,58 +111,56 @@ extension ToDoItem {
 }
 
 extension ToDoItem {
-    
-    //MARK: - Work with CSV format
-    
+
+    // MARK: - Work with CSV format
+
     var csv: String {
         var csvList = [String]()
         csvList.append(self.id)
         csvList.append(self.text)
         csvList.append(importance == .common ? "" : importance.rawValue)
-        
+
         if let deadLine = self.deadLine {
             csvList.append(String(deadLine.timeIntervalSince1970))
         } else {
             csvList.append("")
         }
-        
+
         csvList.append(self.isDone == true ? "true" : "false")
         csvList.append(String(self.startTime.timeIntervalSince1970))
-        
+
         if let changeTime = self.changeTime {
             csvList.append(String(changeTime.timeIntervalSince1970))
         } else {
             csvList.append("")
         }
-        
+
         return csvList.joined(separator: ToDoItem.splitter)
     }
-    
+
     static func parse(csv: String) -> ToDoItem? {
         let csvList = csv.components(separatedBy: ToDoItem.splitter)
-        
+
         if csvList.count >= 7,
            !csvList[1].isEmpty,
-           let startTime = Double(csvList[csvList.count-2])
-        {
-            let importanceEnum = csvList[csvList.count-5] == "важная" ? Importance.important : (csvList[csvList.count-5] == "неважная" ? Importance.unimportant : Importance.common)
-            
+           let startTime = Double(csvList[csvList.count-2]) {
+            let importanceEnum = csvList[csvList.count-5] == "important" ? Importance.important : (csvList[csvList.count-5] == "low" ? Importance.unimportant : Importance.common)
+
             if let deadLine = Double(csvList[csvList.count-4]),
                startTime >= deadLine { return nil }
-            
+
             if let changeTime = Double(csvList[csvList.count-1]),
                startTime >= changeTime { return nil }
-            
+
             if let deadLine = Double(csvList[csvList.count-4]),
                let changeTime = Double(csvList[csvList.count-1]),
                changeTime >= deadLine { return nil }
-            
+
             var text = csvList[1]
-            
-            for i in 2..<(csvList.count-5) {
-                text += "," + csvList[i]
+
+            for index in 2..<(csvList.count-5) {
+                text += "," + csvList[index]
             }
-            
             return ToDoItem(id: !csvList[0].isEmpty ? csvList[0] : UUID().uuidString, // id
                             text: text, // text
                             importance: importanceEnum, // importance

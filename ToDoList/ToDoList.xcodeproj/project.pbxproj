@@ -36,6 +36,13 @@
 		C8AE7F132A4F8BFE002ADC4E /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = C8AE7F122A4F8BFE002ADC4E /* CocoaLumberjack */; };
 		C8AE7F152A4F8BFE002ADC4E /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C8AE7F142A4F8BFE002ADC4E /* CocoaLumberjackSwift */; };
 		C8AE7F172A4F8BFE002ADC4E /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = C8AE7F162A4F8BFE002ADC4E /* CocoaLumberjackSwiftLogBackend */; };
+		C8AE7F692A55F819002ADC4E /* URLSessionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F682A55F819002ADC4E /* URLSessionExtension.swift */; };
+		C8AE7F6B2A55FC67002ADC4E /* DefaultNetworkingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F6A2A55FC67002ADC4E /* DefaultNetworkingService.swift */; };
+		C8AE7F6D2A560150002ADC4E /* ToDoItemServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F6C2A560150002ADC4E /* ToDoItemServer.swift */; };
+		C8AE7F6F2A560170002ADC4E /* ListResponseServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F6E2A560170002ADC4E /* ListResponseServer.swift */; };
+		C8AE7F722A56071B002ADC4E /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F712A56071B002ADC4E /* Session.swift */; };
+		C8AE7F742A5756C5002ADC4E /* ItemResponseServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F732A5756C5002ADC4E /* ItemResponseServer.swift */; };
+		C8AE7F762A57EF81002ADC4E /* RequestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F752A57EF81002ADC4E /* RequestError.swift */; };
 		C8CE8DF82A389472002A2A00 /* FileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CE8DF72A389472002A2A00 /* FileCache.swift */; };
 /* End PBXBuildFile section */
 
@@ -92,6 +99,13 @@
 		C8686AAD2A375587000C9CF3 /* ToDoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItem.swift; sourceTree = "<group>"; };
 		C89556012A4D607900BC557C /* AddNewItemControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNewItemControl.swift; sourceTree = "<group>"; };
 		C89556052A4D953900BC557C /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		C8AE7F682A55F819002ADC4E /* URLSessionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionExtension.swift; sourceTree = "<group>"; };
+		C8AE7F6A2A55FC67002ADC4E /* DefaultNetworkingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultNetworkingService.swift; sourceTree = "<group>"; };
+		C8AE7F6C2A560150002ADC4E /* ToDoItemServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItemServer.swift; sourceTree = "<group>"; };
+		C8AE7F6E2A560170002ADC4E /* ListResponseServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListResponseServer.swift; sourceTree = "<group>"; };
+		C8AE7F712A56071B002ADC4E /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		C8AE7F732A5756C5002ADC4E /* ItemResponseServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemResponseServer.swift; sourceTree = "<group>"; };
+		C8AE7F752A57EF81002ADC4E /* RequestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestError.swift; sourceTree = "<group>"; };
 		C8CE8DF72A389472002A2A00 /* FileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCache.swift; sourceTree = "<group>"; };
 		F02811785B4913DC71809208 /* Pods-ToDoListTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ToDoListTests.debug.xcconfig"; path = "Target Support Files/Pods-ToDoListTests/Pods-ToDoListTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -167,6 +181,7 @@
 			isa = PBXGroup;
 			children = (
 				C83C12272A4380D400950448 /* UIViewExtension.swift */,
+				C8AE7F682A55F819002ADC4E /* URLSessionExtension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -210,6 +225,7 @@
 				C8CE8E0D2A3C5AA6002A2A00 /* Cache */,
 				C83C12102A40E1FA00950448 /* Cells */,
 				C83C122D2A44996D00950448 /* Controllers */,
+				C8AE7F702A560677002ADC4E /* NetworkService */,
 				C83C12292A4380DB00950448 /* Extensions */,
 				C89556092A4DB97C00BC557C /* Colors */,
 				C8686A7A2A375561000C9CF3 /* AppDelegate.swift */,
@@ -258,10 +274,23 @@
 			path = Colors;
 			sourceTree = "<group>";
 		};
+		C8AE7F702A560677002ADC4E /* NetworkService */ = {
+			isa = PBXGroup;
+			children = (
+				C8AE7F6A2A55FC67002ADC4E /* DefaultNetworkingService.swift */,
+				C8AE7F752A57EF81002ADC4E /* RequestError.swift */,
+			);
+			path = NetworkService;
+			sourceTree = "<group>";
+		};
 		C8CE8E0C2A3C5A98002A2A00 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				C8AE7F712A56071B002ADC4E /* Session.swift */,
 				C8686AAD2A375587000C9CF3 /* ToDoItem.swift */,
+				C8AE7F6E2A560170002ADC4E /* ListResponseServer.swift */,
+				C8AE7F732A5756C5002ADC4E /* ItemResponseServer.swift */,
+				C8AE7F6C2A560150002ADC4E /* ToDoItemServer.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -504,6 +533,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C8686A7F2A375561000C9CF3 /* ItemViewController.swift in Sources */,
+				C8AE7F6F2A560170002ADC4E /* ListResponseServer.swift in Sources */,
 				C83C12122A417A5400950448 /* ImportanceCell.swift in Sources */,
 				C8686A7B2A375561000C9CF3 /* AppDelegate.swift in Sources */,
 				C8686AAE2A375587000C9CF3 /* ToDoItem.swift in Sources */,
@@ -513,14 +543,20 @@
 				C8686A7D2A375561000C9CF3 /* SceneDelegate.swift in Sources */,
 				C83C127C2A4AE9D900950448 /* ItemListCell.swift in Sources */,
 				C83C12282A4380D400950448 /* UIViewExtension.swift in Sources */,
+				C8AE7F762A57EF81002ADC4E /* RequestError.swift in Sources */,
 				C83C127A2A4ADE8D00950448 /* HeaderForSectionView.swift in Sources */,
 				C89556062A4D953900BC557C /* Colors.swift in Sources */,
 				C83C12782A4AD15800950448 /* ShowOrHideControl.swift in Sources */,
 				C8CE8DF82A389472002A2A00 /* FileCache.swift in Sources */,
+				C8AE7F692A55F819002ADC4E /* URLSessionExtension.swift in Sources */,
+				C8AE7F742A5756C5002ADC4E /* ItemResponseServer.swift in Sources */,
 				C83C12762A4AC05100950448 /* ItemsListViewController.swift in Sources */,
 				C89556022A4D607900BC557C /* AddNewItemControl.swift in Sources */,
 				C83C12262A432F5F00950448 /* DeleteCell.swift in Sources */,
+				C8AE7F722A56071B002ADC4E /* Session.swift in Sources */,
 				C8686A852A375561000C9CF3 /* ToDoList.xcdatamodeld in Sources */,
+				C8AE7F6D2A560150002ADC4E /* ToDoItemServer.swift in Sources */,
+				C8AE7F6B2A55FC67002ADC4E /* DefaultNetworkingService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
