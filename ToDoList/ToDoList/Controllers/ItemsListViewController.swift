@@ -25,6 +25,8 @@ class ItemsListViewController: UIViewController {
     private let fileCache = FileCache()
 
     private var items: [ToDoItem] = [ToDoItem]()
+    private var fileCacheItems: [ToDoItem] = [ToDoItem]()
+    private var serverItems: [ToDoItem] = [ToDoItem]()
 
     private var rowsCount: Int {
         items.count
@@ -40,6 +42,12 @@ class ItemsListViewController: UIViewController {
         deviceId: UIDevice.current.identifierForVendor?.uuidString ?? ""
     )
 
+    private lazy var downloadAnimationView: DownloadAnimationView = {
+        let downloadAnimationView = DownloadAnimationView()
+        downloadAnimationView.backgroundColor = Colors.backPrimary.value
+        return downloadAnimationView
+    }()
+
     // MARK: - Lifecircle
 
     override func viewDidLoad() {
@@ -50,6 +58,8 @@ class ItemsListViewController: UIViewController {
         configureViewController()
         configureTableView()
         configureAddNewItemControl()
+        //configureDownloadAnimationView()
+        //setUpDownloadAnimation()
 
         NotificationCenter
             .default
@@ -66,40 +76,65 @@ class ItemsListViewController: UIViewController {
             print(error)
         }
 
-        Task {
-            do {
-                let list = try await networkService.fetchItems()
-                items = list.filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime}
-                await MainActor.run(body: { self.tableView.reloadData()})
-                print(list)
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
+//        Task {
+//            do {
+//                if items.count != 0 {
+//                    items = try await networkService.patch(for: items)
+//                }
+//                serverItems = try await networkService.fetchItems()
+//                print(serverItems.count)
+//                items = serverItems.filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime}
+//                await MainActor.run(body: {
+//                    cancelDownloadAnimation()
+//                    self.tableView.reloadData()
+//                })
+//            } catch let error {
+//                if let requestError = error as? RequestError {
+//                    await MainActor.run(
+//                        body: { self.show(message: requestError.localizedDescription) }
+//                    )
+//                } else {
+//                    print(error.localizedDescription)
+//                }
+//            }
+//        }
         print(#function)
     }
 
     @objc private func saveItems() {
-//        do {
-//            try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
-//        } catch let error {
-//            print(error)
-//        }
-        Task {
-            do {
-                let result = try await networkService.patch(for: fileCache.items)
-                print(result)
-            } catch let error {
-                print(error)
-            }
+        do {
+            try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
+        } catch let error {
+            print(error)
         }
+
+//        var result: [ToDoItem]?
+//        Task {
+//            do {
+//                result = try await networkService.patch(for: items)
+//            } catch let error {
+//                if let requestError = error as? RequestError {
+//                    await MainActor.run(
+//                        body: { self.show(message: requestError.localizedDescription) }
+//                    )
+//                } else {
+//                    print(error.localizedDescription)
+//                }
+//            }
+//            if result == nil {
+//                do {
+//                    try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
+//                } catch let error {
+//                    print(error)
+//                }
+//            }
+//        }
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
 
         self.view.layer.backgroundColor = Colors.backPrimary.value.cgColor
-
     }
 
     deinit {
@@ -154,6 +189,55 @@ class ItemsListViewController: UIViewController {
         ])
 
         addNewItemControl.delegate = self
+    }
+
+    private func configureDownloadAnimationView() {
+        downloadAnimationView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(downloadAnimationView)
+
+        NSLayoutConstraint.activate([
+            downloadAnimationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            downloadAnimationView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            downloadAnimationView.widthAnchor.constraint(equalToConstant: 60),
+            downloadAnimationView.heightAnchor.constraint(equalTo: downloadAnimationView.widthAnchor, multiplier: 1/3)
+        ])
+    }
+
+    private func setUpDownloadAnimation() {
+        downloadAnimationView.isHidden = false
+        downloadAnimationView.firstCircle.backgroundColor = .gray
+        downloadAnimationView.secondCircle.backgroundColor = .gray
+        downloadAnimationView.thirdCircle.backgroundColor = .gray
+        UIView.animate(withDuration: 1,
+                       delay: 0,
+                       options: [.autoreverse, .repeat],
+                       animations: { [self] in
+            downloadAnimationView.firstCircle.alpha = 0
+        })
+        UIView.animate(withDuration: 1,
+                       delay: 0.5,
+                       options: [.autoreverse, .repeat],
+                       animations: { [self] in
+            downloadAnimationView.secondCircle.alpha = 0
+        })
+        UIView.animate(withDuration: 1,
+                       delay: 1,
+                       options: [.autoreverse, .repeat],
+                       animations: { [self] in
+            downloadAnimationView.thirdCircle.alpha = 0
+        })
+    }
+
+    private func cancelDownloadAnimation() {
+        downloadAnimationView.firstCircle.layer.removeAllAnimations()
+        downloadAnimationView.secondCircle.layer.removeAllAnimations()
+        downloadAnimationView.thirdCircle.layer.removeAllAnimations()
+
+        downloadAnimationView.firstCircle.backgroundColor = .clear
+        downloadAnimationView.secondCircle.backgroundColor = .clear
+        downloadAnimationView.thirdCircle.backgroundColor = .clear
+
+        downloadAnimationView.isHidden = true
     }
 
 }

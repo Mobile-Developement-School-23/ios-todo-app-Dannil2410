@@ -34,7 +34,9 @@ final class DefaultNetworkingService: NetworkingService {
         components.path = "/todobackend/list"
         return components
     }()
-    
+
+    private let timeoutForRequest: Double = 60
+
     // MARK: - Initializer
 
     init(deviceId: String) {
@@ -124,12 +126,18 @@ final class DefaultNetworkingService: NetworkingService {
     func delete(for toDoItem: ToDoItem) async throws -> ToDoItem? {
         let url = try gatherURL(for: toDoItem.id)
 
+        print(url)
         let (data, response) = try await session.data(for: gatherDeleteRequest(url: url))
 
         try typeOfResponse(code: (response as? HTTPURLResponse)?.statusCode ?? 0)
 
+        print("kek")
+        print(revision)
+        print((response as? HTTPURLResponse)?.statusCode)
+        print(String(data: data, encoding: .utf8)!)
         let responseServer = try JSONDecoder().decode(ItemResponseServer.self, from: data)
 
+        print("lol")
         if let revision = responseServer.revision {
             self.revision = revision
         }
@@ -169,13 +177,13 @@ final class DefaultNetworkingService: NetworkingService {
     }
 
     private func gatherGetRequest(url: URL) -> URLRequest {
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, timeoutInterval: timeoutForRequest)
         request.setValue("Bearer \(Session.shared.token)", forHTTPHeaderField: "Authorization")
         return request
     }
 
     private func gatherPatchRequest(url: URL, body: Data) -> URLRequest {
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, timeoutInterval: timeoutForRequest)
         request.httpMethod = "PATCH"
         request.setValue("Bearer \(Session.shared.token)", forHTTPHeaderField: "Authorization")
         request.setValue(String(revision), forHTTPHeaderField: "X-Last-Known-Revision")
@@ -184,7 +192,7 @@ final class DefaultNetworkingService: NetworkingService {
     }
 
     private func gatherPostRequest(url: URL, body: Data) -> URLRequest {
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, timeoutInterval: timeoutForRequest)
         request.httpMethod = "POST"
         request.setValue("Bearer \(Session.shared.token)", forHTTPHeaderField: "Authorization")
         request.setValue(String(revision), forHTTPHeaderField: "X-Last-Known-Revision")
@@ -195,7 +203,7 @@ final class DefaultNetworkingService: NetworkingService {
     }
 
     private func gatherPutRequest(url: URL, body: Data) -> URLRequest {
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, timeoutInterval: timeoutForRequest)
         request.httpMethod = "PUT"
         request.setValue("Bearer \(Session.shared.token)", forHTTPHeaderField: "Authorization")
         request.httpBody = body
@@ -203,10 +211,10 @@ final class DefaultNetworkingService: NetworkingService {
     }
 
     private func gatherDeleteRequest(url: URL) -> URLRequest {
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, timeoutInterval: timeoutForRequest)
         request.httpMethod = "DELETE"
         request.setValue("Bearer \(Session.shared.token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(String(revision), forHTTPHeaderField: "X-Last-Known-Revision")
         return request
     }
 

@@ -43,6 +43,8 @@
 		C8AE7F722A56071B002ADC4E /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F712A56071B002ADC4E /* Session.swift */; };
 		C8AE7F742A5756C5002ADC4E /* ItemResponseServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F732A5756C5002ADC4E /* ItemResponseServer.swift */; };
 		C8AE7F762A57EF81002ADC4E /* RequestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F752A57EF81002ADC4E /* RequestError.swift */; };
+		C8AE7F7A2A58578D002ADC4E /* DownloadAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F792A58578D002ADC4E /* DownloadAnimationView.swift */; };
+		C8AE7F7C2A586888002ADC4E /* UIViewControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F7B2A586888002ADC4E /* UIViewControllerExtension.swift */; };
 		C8CE8DF82A389472002A2A00 /* FileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CE8DF72A389472002A2A00 /* FileCache.swift */; };
 /* End PBXBuildFile section */
 
@@ -106,6 +108,8 @@
 		C8AE7F712A56071B002ADC4E /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		C8AE7F732A5756C5002ADC4E /* ItemResponseServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemResponseServer.swift; sourceTree = "<group>"; };
 		C8AE7F752A57EF81002ADC4E /* RequestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestError.swift; sourceTree = "<group>"; };
+		C8AE7F792A58578D002ADC4E /* DownloadAnimationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadAnimationView.swift; sourceTree = "<group>"; };
+		C8AE7F7B2A586888002ADC4E /* UIViewControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewControllerExtension.swift; sourceTree = "<group>"; };
 		C8CE8DF72A389472002A2A00 /* FileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCache.swift; sourceTree = "<group>"; };
 		F02811785B4913DC71809208 /* Pods-ToDoListTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ToDoListTests.debug.xcconfig"; path = "Target Support Files/Pods-ToDoListTests/Pods-ToDoListTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -181,6 +185,7 @@
 			isa = PBXGroup;
 			children = (
 				C83C12272A4380D400950448 /* UIViewExtension.swift */,
+				C8AE7F7B2A586888002ADC4E /* UIViewControllerExtension.swift */,
 				C8AE7F682A55F819002ADC4E /* URLSessionExtension.swift */,
 			);
 			path = Extensions;
@@ -228,6 +233,7 @@
 				C8AE7F702A560677002ADC4E /* NetworkService */,
 				C83C12292A4380DB00950448 /* Extensions */,
 				C89556092A4DB97C00BC557C /* Colors */,
+				C8AE7F812A58C079002ADC4E /* Animation */,
 				C8686A7A2A375561000C9CF3 /* AppDelegate.swift */,
 				C8686A7C2A375561000C9CF3 /* SceneDelegate.swift */,
 				C8686A802A375561000C9CF3 /* Main.storyboard */,
@@ -281,6 +287,14 @@
 				C8AE7F752A57EF81002ADC4E /* RequestError.swift */,
 			);
 			path = NetworkService;
+			sourceTree = "<group>";
+		};
+		C8AE7F812A58C079002ADC4E /* Animation */ = {
+			isa = PBXGroup;
+			children = (
+				C8AE7F792A58578D002ADC4E /* DownloadAnimationView.swift */,
+			);
+			path = Animation;
 			sourceTree = "<group>";
 		};
 		C8CE8E0C2A3C5A98002A2A00 /* Model */ = {
@@ -539,9 +553,11 @@
 				C8686AAE2A375587000C9CF3 /* ToDoItem.swift in Sources */,
 				C83C120F2A40E1F600950448 /* TextCell.swift in Sources */,
 				C83C121F2A41E5D200950448 /* SetDeadLineCell.swift in Sources */,
+				C8AE7F7A2A58578D002ADC4E /* DownloadAnimationView.swift in Sources */,
 				C83C12242A42FD9100950448 /* CalendarCell.swift in Sources */,
 				C8686A7D2A375561000C9CF3 /* SceneDelegate.swift in Sources */,
 				C83C127C2A4AE9D900950448 /* ItemListCell.swift in Sources */,
+				C8AE7F7C2A586888002ADC4E /* UIViewControllerExtension.swift in Sources */,
 				C83C12282A4380D400950448 /* UIViewExtension.swift in Sources */,
 				C8AE7F762A57EF81002ADC4E /* RequestError.swift in Sources */,
 				C83C127A2A4ADE8D00950448 /* HeaderForSectionView.swift in Sources */,
