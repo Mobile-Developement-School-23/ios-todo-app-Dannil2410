@@ -58,8 +58,8 @@ class ItemsListViewController: UIViewController {
         configureViewController()
         configureTableView()
         configureAddNewItemControl()
-        //configureDownloadAnimationView()
-        //setUpDownloadAnimation()
+        configureDownloadAnimationView()
+        setUpDownloadAnimation()
 
         NotificationCenter
             .default
@@ -76,28 +76,23 @@ class ItemsListViewController: UIViewController {
             print(error)
         }
 
-//        Task {
-//            do {
-//                if items.count != 0 {
-//                    items = try await networkService.patch(for: items)
-//                }
-//                serverItems = try await networkService.fetchItems()
-//                print(serverItems.count)
-//                items = serverItems.filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime}
-//                await MainActor.run(body: {
-//                    cancelDownloadAnimation()
-//                    self.tableView.reloadData()
-//                })
-//            } catch let error {
-//                if let requestError = error as? RequestError {
-//                    await MainActor.run(
-//                        body: { self.show(message: requestError.localizedDescription) }
-//                    )
-//                } else {
-//                    print(error.localizedDescription)
-//                }
-//            }
-//        }
+        Task {
+            do {
+                items = try await networkService.patch(for: items)
+                await MainActor.run(body: {
+                    cancelDownloadAnimation()
+                    self.tableView.reloadData()
+                })
+            } catch let error {
+                if let requestError = error as? RequestError {
+                    await MainActor.run(
+                        body: { self.show(message: requestError.localizedDescription) }
+                    )
+                } else {
+                    print(error.localizedDescription)
+                }
+            }
+        }
         print(#function)
     }
 
