@@ -7,13 +7,26 @@
 
 import UIKit
 
+enum RequestMethod {
+    case post, put, delete
+}
+
+@MainActor
 protocol TableViewRowAppendable: AnyObject {
-    func updateTableView(showOrHideAncestor: ShowAction)
+    func updateTableView(showOrHideAncestor: ShowAction, method: RequestMethod, item: ToDoItem)
 }
 
 class ItemViewController: UIViewController {
 
     // MARK: - Properties
+
+    var toDoItem: ToDoItem?
+
+    var showOrHideAncestor: ShowAction = .hide
+
+    weak var delegate: TableViewRowAppendable?
+
+    var isPortrait = true
 
     private lazy var tableView = UITableView()
 
@@ -32,23 +45,15 @@ class ItemViewController: UIViewController {
         return dateFormatter
     }()
 
-    var fileCache: FileCache?
-
-    var toDoItem: ToDoItem?
-
-    var showOrHideAncestor: ShowAction = .hide
-
-    weak var delegate: TableViewRowAppendable?
-
-    private var flag = 0 // поменять название!!!!!!
+    private var attempToRecoverItem = false
 
     private let numberOfSection = 3
-
-    var isPortrait = true
 
     private var currentImportance: Importance = .important
 
     private var currentDeadLine: Double?
+
+    private var isNew = false
 
     // MARK: - Lifecircle
 
@@ -64,9 +69,13 @@ class ItemViewController: UIViewController {
         configureNavigationItems()
         configureWorkWithNotificationCenter()
 
+        isNew = toDoItem == nil ? true : false
+
         let tapGR = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
         tapGR.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGR)
+
+        print(#function)
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -136,87 +145,108 @@ class ItemViewController: UIViewController {
 
     private func configureWorkWithNotificationCenter() {
         let notificationHasText = Notification.Name(TextCell.notificationHasText)
-        NotificationCenter.default.addObserver(self, selector: #selector(toDoIfHasText(_:)), name: notificationHasText, object: nil)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(willShowKeyboard(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(toDoIfHasText(_:)),
+                name: notificationHasText,
+                object: nil
+            )
 
-        NotificationCenter.default.addObserver(self, selector: #selector(willHideKeyboard(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(willShowKeyboard(_:)),
+                name: UIResponder.keyboardWillShowNotification,
+                object: nil
+            )
 
-        NotificationCenter.default.addObserver(self, selector: #selector(rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(willHideKeyboard(_:)),
+                name: UIResponder.keyboardWillHideNotification,
+                object: nil
+            )
+
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(rotated),
+                name: UIDevice.orientationDidChangeNotification,
+                object: nil
+            )
     }
 
     // MARK: - Selector functions
 
     @objc private func rightBarButtonItemToDo() {
         if isPortrait {
-            gatherToDoItem()
-            if let toDoItem = toDoItem,
-               let fileCache = fileCache,
-               flag == 0 {
-                fileCache.appendItem(toDoItem)
-                delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor)
-//                Task {
-//                    do {
-//                        let result = try await
-//                    } catch let error {
-//                        print(error)
-//                    }
-//                }
+            toDoIfIsPortrait()
+        } else {
+            toDoIfLandscape()
+        }
+    }
+
+    private func toDoIfIsPortrait() {
+        gatherToDoItem()
+        if let item = toDoItem,
+           !attempToRecoverItem {
+            delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor, method: isNew ? .post : .put, item: item)
+            self.dismiss(animated: true)
+        }
+    }
+
+    private func toDoIfLandscape() {
+        guard let textCell = tableView.cellForRow(at: indexPathTextCell) as? TextCell else {
+            return
+        }
+        if let toDoItem = toDoItem {
+            // если ничего не изменилось в isDone = true
+            if toDoItem.isDone,
+               toDoItem.text == textCell.textView.text,
+               toDoItem.importance == currentImportance,
+               currentDeadLine == nil {
                 self.dismiss(animated: true)
+            }
+            // если что-то поменялось в isDone = true
+            else if toDoItem.isDone {
+                self.toDoItem = ToDoItem(
+                    id: toDoItem.id,
+                    text: textCell.textView.text,
+                    importance: currentImportance,
+                    deadLineTimeIntervalSince1970: currentDeadLine,
+                    isDone: false,
+                    startTimeIntervalSince1970: Date.now.timeIntervalSince1970,
+                    changeTimeIntervalSince1970: nil)
+                createAlertController(toDoItem: toDoItem)
+            } else {
+                // если были какие-то изменения, то сохранить с ними
+                toDoIfNotDoneChangedLandscape(textCell: textCell)
             }
         } else {
-            guard let textCell = tableView.cellForRow(at: indexPathTextCell) as? TextCell else {
-                return
-            }
-            //если ничего не изменилось в isDone = true
-            if let toDoItem = toDoItem {
-                if toDoItem.isDone,
-                   toDoItem.text == textCell.textView.text,
-                   toDoItem.importance == currentImportance {
-                    self.dismiss(animated: true)
-                }
-                // если что-то поменялось в isDone = true
-                else if toDoItem.isDone {
-                    self.toDoItem = ToDoItem(
-                        id: toDoItem.id,
-                        text: textCell.textView.text,
-                        importance: currentImportance,
-                        deadLineTimeIntervalSince1970: currentDeadLine,
-                        isDone: false,
-                        startTimeIntervalSince1970: Date.now.timeIntervalSince1970,
-                        changeTimeIntervalSince1970: nil)
-                    createAlertController(toDoItem: toDoItem)
-                } else {
-                    //если были какие-то изменения, то сохранить с ними
-                    fileCache?.appendItem(
-                        ToDoItem(
-                            id: toDoItem.id,
-                            text: textCell.textView.text,
-                            importance: currentImportance,
-                            deadLineTimeIntervalSince1970: currentDeadLine,
-                            isDone: false,
-                            startTimeIntervalSince1970: toDoItem.startTime.timeIntervalSince1970,
-                            changeTimeIntervalSince1970: Date.now.timeIntervalSince1970
-                        )
-                    )
-                    delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor)
-                    self.dismiss(animated: true)
-                }
-            } else {
-                fileCache?.appendItem(
-                    ToDoItem(
-                        id: UUID().uuidString,
-                        text: textCell.textView.text,
-                        importance: currentImportance,
-                        deadLineTimeIntervalSince1970: currentDeadLine,
-                        isDone: false,
-                        startTimeIntervalSince1970: Date.now.timeIntervalSince1970,
-                        changeTimeIntervalSince1970: nil)
-                )
-                delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor)
-                self.dismiss(animated: true)
-            }
+            toDoIfNotDoneChangedLandscape(textCell: textCell)
         }
+    }
+
+    private func toDoIfNotDoneChangedLandscape(textCell: TextCell) {
+        let startTime = toDoItem?.startTime.timeIntervalSince1970
+        let item = ToDoItem(
+            id: toDoItem?.id ?? UUID().uuidString,
+            text: textCell.textView.text,
+            importance: currentImportance,
+            deadLineTimeIntervalSince1970: currentDeadLine,
+            isDone: false,
+            startTimeIntervalSince1970: startTime ?? Date.now.timeIntervalSince1970,
+            changeTimeIntervalSince1970: startTime == nil ? nil : Date.now.timeIntervalSince1970
+        )
+        delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor, method: isNew ? .post : .put, item: item)
+        self.dismiss(animated: true)
     }
 
     private func gatherToDoItem() {
@@ -226,13 +256,16 @@ class ItemViewController: UIViewController {
             return
         }
 
-        var id: String?
         var startTime: Double?
-        var changeTime: Double?
         var deadLine: Double?
 
         let text = textCell.textView.text
-        let importance = Importance.allCases[importanceCell.importanceSegmentedControl.selectedSegmentIndex]
+        let importance = Importance
+            .allCases[
+                importanceCell
+                    .importanceSegmentedControl
+                    .selectedSegmentIndex
+            ]
 
         if let deadLineString = setDeadLineCell.deadLineLabel.text {
             deadLine = dateFormatter.date(from: deadLineString)?.timeIntervalSince1970
@@ -246,27 +279,21 @@ class ItemViewController: UIViewController {
                deadLine == nil {
                 return
             } else if toDoItem.isDone {
+                // поля поменялись, поэтому создаем alert для подтверждения изменений
                 createAlertController(toDoItem: toDoItem)
                }
-            // если да, то обновляем startTime и делаем задачу isDone = false
-            id = toDoItem.id
+            // если поля поменялись или задача была не isDone
             startTime = toDoItem.isDone ? nil : toDoItem.startTime.timeIntervalSince1970
         }
 
-        let isDone = false
-
-        if startTime != nil {
-            changeTime = Date.now.timeIntervalSince1970
-        }
-
         self.toDoItem = ToDoItem(
-            id: id ?? UUID().uuidString,
+            id: toDoItem?.id ?? UUID().uuidString,
             text: text ?? "",
             importance: importance,
             deadLineTimeIntervalSince1970: deadLine,
-            isDone: isDone,
+            isDone: false,
             startTimeIntervalSince1970: startTime ?? Date.now.timeIntervalSince1970,
-            changeTimeIntervalSince1970: changeTime
+            changeTimeIntervalSince1970: startTime != nil ? Date.now.timeIntervalSince1970 : nil
         )
     }
 
@@ -278,10 +305,8 @@ class ItemViewController: UIViewController {
 
        let okAction = UIAlertAction(title: "Ok", style: .default, handler: { [weak self] _ in
            guard let self else { return }
-           if let toDoItem = self.toDoItem,
-              let fileCache = self.fileCache {
-               fileCache.appendItem(toDoItem)
-               self.delegate?.updateTableView(showOrHideAncestor: self.showOrHideAncestor)
+           if let item = self.toDoItem {
+               self.delegate?.updateTableView(showOrHideAncestor: self.showOrHideAncestor, method: .put, item: item)
                self.dismiss(animated: true)
            }
        })
@@ -293,12 +318,13 @@ class ItemViewController: UIViewController {
                                         handler: { [weak self] _ in
            guard let self else { return }
            self.toDoItem = toDoItem
+           self.tableView.reloadData()
        })
 
        alertController.addAction(cancelAction)
 
        self.present(alertController, animated: true)
-       flag = 1
+       attempToRecoverItem = true
     }
 
     @objc private func leftBarButtonItemToDo() {
@@ -362,11 +388,18 @@ extension ItemViewController: UITableViewDataSource {
         return section == 0 || section == 2 ? 1 : countRowsInSecondSection
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
 
         if indexPath == indexPathTextCell {
 
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: TextCell.identifier, for: indexPath) as? TextCell else {
+            guard let cell = tableView
+                .dequeueReusableCell(
+                    withIdentifier: TextCell.identifier,
+                    for: indexPath
+                ) as? TextCell else {
                 preconditionFailure("TextCell can not be dequeued")
             }
             if let toDoItem = toDoItem {
@@ -386,19 +419,29 @@ extension ItemViewController: UITableViewDataSource {
 
         } else if indexPath == indexPathImportanceCell {
 
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: ImportanceCell.indentifier, for: indexPath) as? ImportanceCell else {
+            guard let cell = tableView
+                .dequeueReusableCell(
+                    withIdentifier: ImportanceCell.indentifier,
+                    for: indexPath
+                ) as? ImportanceCell else {
                 preconditionFailure("ImportanceCell can not be dequeued")
             }
 
             if let toDoItem = toDoItem {
-                cell.importanceSegmentedControl.selectedSegmentIndex = Importance.allCases.firstIndex(of: toDoItem.importance) ?? 2
+                cell.importanceSegmentedControl.selectedSegmentIndex = Importance
+                    .allCases
+                    .firstIndex(of: toDoItem.importance) ?? 2
             }
             cell.isHidden = isPortrait ? false : true
             return cell
 
         } else if indexPath == indexPathSetDeadLineCell {
 
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: SetDeadLineCell.identifier, for: indexPath) as? SetDeadLineCell else {
+            guard let cell = tableView
+                .dequeueReusableCell(
+                    withIdentifier: SetDeadLineCell.identifier,
+                    for: indexPath
+                ) as? SetDeadLineCell else {
                 preconditionFailure("SetDeadLineCell can not be dequeued")
             }
             if let toDoItem = toDoItem,
@@ -420,7 +463,11 @@ extension ItemViewController: UITableViewDataSource {
         } else if countRowsInSecondSection == 3,
                   indexPath == indexPathCalendarCell {
 
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: CalendarCell.identifier, for: indexPath) as? CalendarCell else {
+            guard let cell = tableView
+                .dequeueReusableCell(
+                    withIdentifier: CalendarCell.identifier,
+                    for: indexPath
+                ) as? CalendarCell else {
                 preconditionFailure("CalendarCell can not be dequeued")
             }
             cell.delegate = self
@@ -429,7 +476,11 @@ extension ItemViewController: UITableViewDataSource {
 
         } else if indexPath == indexPathDeleteCell {
 
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: DeleteCell.identifier, for: indexPath) as? DeleteCell else {
+            guard let cell = tableView
+                .dequeueReusableCell(
+                    withIdentifier: DeleteCell.identifier,
+                    for: indexPath
+                ) as? DeleteCell else {
                 preconditionFailure("DeleteCell can not be dequeued")
             }
             if toDoItem != nil {
@@ -481,9 +532,8 @@ extension ItemViewController: UITableViewDelegate {
                   let textCell = tableView.cellForRow(at: indexPathTextCell) as? TextCell,
                   !textCell.textView.text.isEmpty,
                   textCell.textView.text != "Что надо сделать?" {
-            if let toDoItem = self.toDoItem {
-                fileCache?.deleteItem(for: toDoItem.id)
-                delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor)
+            if let item = self.toDoItem {
+                delegate?.updateTableView(showOrHideAncestor: showOrHideAncestor, method: .delete, item: item)
             }
             self.dismiss(animated: true)
         }

@@ -7,24 +7,25 @@
 
 import UIKit
 
+@MainActor
 protocol SwitchCalendarHidable: AnyObject {
     func hideCalendar()
 }
 
 class SetDeadLineCell: UITableViewCell {
 
-    //MARK: - Properties
-    
+    // MARK: - Properties
+
     static let identifier = "SetDeadLineCell"
     static let notificationHideCalendar = "Hide Calendar"
-    
+
     private let doneByLabelHeightAnchorConstant: CGFloat = 17
     private var dateFormatter: DateFormatter?
     private var selectedDay: Date?
     var calendarIsActive: Bool = false
-    
+
     weak var delegate: SwitchCalendarHidable?
-    
+
     private lazy var doneByLabel: UILabel = {
         let doneByLabel = UILabel()
         doneByLabel.font = UIFont.systemFont(ofSize: 17)
@@ -32,7 +33,7 @@ class SetDeadLineCell: UITableViewCell {
         doneByLabel.translatesAutoresizingMaskIntoConstraints = false
         return doneByLabel
     }()
-    
+
     lazy var switcher: UISwitch = {
         let switcher = UISwitch()
         switcher.isSelected = false
@@ -40,7 +41,7 @@ class SetDeadLineCell: UITableViewCell {
         switcher.addTarget(self, action: #selector(switchValueDidChange(_:)), for: .valueChanged)
         return switcher
     }()
-    
+
     lazy var deadLineLabel: UILabel = {
        let deadLineLabel = UILabel()
         deadLineLabel.textColor = Colors.colorBlue.value
@@ -48,74 +49,84 @@ class SetDeadLineCell: UITableViewCell {
         deadLineLabel.translatesAutoresizingMaskIntoConstraints = false
         return deadLineLabel
     }()
-    
-    //MARK: - Constraint properties
-    
+
+    // MARK: - Constraint properties
+
     private lazy var doneByLabelHeightAnchor: NSLayoutConstraint = {
-        let doneByLabelHeightAnchor = self.doneByLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: doneByLabelHeightAnchorConstant)
+        let doneByLabelHeightAnchor = self.doneByLabel
+            .topAnchor
+            .constraint(
+                equalTo: contentView.topAnchor,
+                constant: doneByLabelHeightAnchorConstant
+            )
         return doneByLabelHeightAnchor
     }()
-    
+
     private lazy var doneByLabelBottomAnchor: NSLayoutConstraint = {
-        let doneByLabelBottomAnchor = self.doneByLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -17)
+        let doneByLabelBottomAnchor = self.doneByLabel
+            .bottomAnchor
+            .constraint(
+                equalTo: contentView.bottomAnchor,
+                constant: -17
+            )
         return doneByLabelBottomAnchor
     }()
-    
-    //MARK: - Lifecircle
-    
+
+    // MARK: - Lifecircle
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         configureDoneByLabel()
         configureSwitcher()
     }
-    
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+
         configureDoneByLabel()
         configureSwitcher()
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
-        
+
         setCorners()
     }
-    
-    //MARK: - Configure functions
-    
+
+    // MARK: - Configure functions
+
     func configureCell(dateFormatter: DateFormatter, selectedDay: Date?) {
         selectionStyle = .none
         self.dateFormatter = dateFormatter
         self.selectedDay = selectedDay
-        
+
         backgroundColor = Colors.backSecondary.value
     }
-    
+
     private func configureDoneByLabel() {
         contentView.addSubview(doneByLabel)
-        
+
         NSLayoutConstraint.activate([
             doneByLabelHeightAnchor,
             doneByLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             doneByLabelBottomAnchor
         ])
     }
-    
+
     private func configureSwitcher() {
         contentView.addSubview(switcher)
-        
+
         NSLayoutConstraint.activate([
             switcher.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 13.5),
             switcher.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
             switcher.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -13.5)
         ])
     }
-    
+
     private func configureDeadLineLabel() {
         contentView.addSubview(deadLineLabel)
-        
+
         NSLayoutConstraint.activate([
             deadLineLabel.topAnchor.constraint(equalTo: doneByLabel.bottomAnchor),
             deadLineLabel.leadingAnchor.constraint(equalTo: doneByLabel.leadingAnchor),
@@ -123,9 +134,9 @@ class SetDeadLineCell: UITableViewCell {
             deadLineLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -9)
         ])
     }
-    
-    //MARK: - Selector functions
-    
+
+    // MARK: - Selector functions
+
     @objc private func switchValueDidChange(_ sender: UISwitch) {
         if sender.isOn {
             toDoIfSenderIsOn()
@@ -133,24 +144,24 @@ class SetDeadLineCell: UITableViewCell {
             toDoIfSenderIsOff()
         }
     }
-    
+
     func toDoIfSenderIsOn() {
         doneByLabelHeightAnchor.constant = 8
         doneByLabelBottomAnchor.isActive = false
 
         getNextDay()
-        
+
         configureDeadLineLabel()
     }
-    
+
     private func toDoIfSenderIsOff() {
         doneByLabelHeightAnchor.constant = doneByLabelHeightAnchorConstant
         doneByLabelBottomAnchor.isActive = true
         deadLineLabel.removeFromSuperview()
-        
+
         delegate?.hideCalendar()
     }
-    
+
     private func getNextDay() {
         let calendar: Calendar = Calendar.current
         var dayFutureComponents: DateComponents = DateComponents()
@@ -161,9 +172,9 @@ class SetDeadLineCell: UITableViewCell {
             deadLineLabel.text = dateFormatter.string(from: nextDay)
         }
     }
-    
-    //MARK: fuctions for setting cornerRadius for cell
-    
+
+    // MARK: fuctions for setting cornerRadius for cell
+
     private func setCorners() {
         if calendarIsActive == false {
             let cornerRadius: CGFloat = 16

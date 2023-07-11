@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum RequestError: Error, LocalizedError {
+enum RequestError: Error, LocalizedError, Equatable {
     case wrongRequest
     case wrongAuth
     case wrongItemId
@@ -23,7 +23,7 @@ enum RequestError: Error, LocalizedError {
         case .wrongItemId:
             return "Error 404! Possibly this item is already non-existent"
         case .serverError:
-            return "Something wrong with server. Try it out a bit later"
+            return "Something wrong with server. The reserve copy has been created"
         case let .unexpectedStatusCode(code):
             return "Something unexpected happened. Error \(code)!!!"
         }

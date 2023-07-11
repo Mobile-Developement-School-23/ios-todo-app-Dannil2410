@@ -10,9 +10,9 @@ import UIKit
 protocol NetworkingService {
     func fetchItems() async throws -> [ToDoItem]
     func patch(for items: [ToDoItem]) async throws -> [ToDoItem]
-    func post(for toDoItem: ToDoItem) async throws -> ToDoItem?
-    func put(for toDoItem: ToDoItem) async throws -> ToDoItem?
-    func delete(for toDoItem: ToDoItem) async throws -> ToDoItem?
+    func post(for toDoItem: ToDoItem) async throws
+    func put(for toDoItem: ToDoItem) async throws
+    func delete(for toDoItem: ToDoItem) async throws
 }
 
 final class DefaultNetworkingService: NetworkingService {
@@ -27,15 +27,18 @@ final class DefaultNetworkingService: NetworkingService {
 
     private let deviceId: String
 
-    private var components: URLComponents = {
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = "beta.mrdekk.ru"
-        components.path = "/todobackend/list"
-        return components
+    private let scheme = "https"
+    private let host = "beta.mrdekk.ru"
+    private let path = "/todobackend/list"
+
+    private lazy var urlComponents: URLComponents = {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = scheme
+        urlComponents.host = host
+        return urlComponents
     }()
 
-    private let timeoutForRequest: Double = 60
+    private let timeoutForRequest: Double = 10
 
     // MARK: - Initializer
 
@@ -50,6 +53,7 @@ final class DefaultNetworkingService: NetworkingService {
 
         let (data, response) = try await session.data(for: gatherGetRequest(url: url))
 
+        print(String(data: data, encoding: .utf8)!)
         try typeOfResponse(code: (response as? HTTPURLResponse)?.statusCode ?? 0)
 
         let responseServer = try JSONDecoder().decode(ListResponseServer.self, from: data)
@@ -79,14 +83,13 @@ final class DefaultNetworkingService: NetworkingService {
         if let revision = responseServer.revision {
             self.revision = revision
         }
-
         return responseServer.list.map { gatherToDoItemFromServer($0) }
     }
 
-    func post(for toDoItem: ToDoItem) async throws -> ToDoItem? {
-        let url = try gatherURL(for: toDoItem.id)
+    func post(for toDoItem: ToDoItem) async throws {
+        let url = try gatherURL()
 
-        let toDoItemServer = gatherToDoItemForServer(toDoItem)
+        let toDoItemServer = ItemResponseServer(element: gatherToDoItemForServer(toDoItem))
 
         let dataForServer = try JSONEncoder().encode(toDoItemServer)
 
@@ -99,14 +102,12 @@ final class DefaultNetworkingService: NetworkingService {
         if let revision = responseServer.revision {
             self.revision = revision
         }
-
-        return gatherToDoItemFromServer(responseServer.element)
     }
 
-    func put(for toDoItem: ToDoItem) async throws -> ToDoItem? {
+    func put(for toDoItem: ToDoItem) async throws {
         let url = try gatherURL(for: toDoItem.id)
 
-        let toDoItemServer = gatherToDoItemForServer(toDoItem)
+        let toDoItemServer = ItemResponseServer(element: gatherToDoItemForServer(toDoItem))
 
         let dataForServer = try JSONEncoder().encode(toDoItemServer)
 
@@ -119,30 +120,20 @@ final class DefaultNetworkingService: NetworkingService {
         if let revision = responseServer.revision {
             self.revision = revision
         }
-
-        return gatherToDoItemFromServer(responseServer.element)
     }
 
-    func delete(for toDoItem: ToDoItem) async throws -> ToDoItem? {
+    func delete(for toDoItem: ToDoItem) async throws {
         let url = try gatherURL(for: toDoItem.id)
 
-        print(url)
         let (data, response) = try await session.data(for: gatherDeleteRequest(url: url))
 
         try typeOfResponse(code: (response as? HTTPURLResponse)?.statusCode ?? 0)
 
-        print("kek")
-        print(revision)
-        print((response as? HTTPURLResponse)?.statusCode)
-        print(String(data: data, encoding: .utf8)!)
         let responseServer = try JSONDecoder().decode(ItemResponseServer.self, from: data)
 
-        print("lol")
         if let revision = responseServer.revision {
             self.revision = revision
         }
-
-        return gatherToDoItemFromServer(responseServer.element)
     }
 
     private func typeOfResponse(code: Int) throws {
@@ -166,11 +157,9 @@ final class DefaultNetworkingService: NetworkingService {
     // MARK: Gather functions
 
     private func gatherURL(for id: String? = nil) throws -> URL {
-        if let id = id {
-            components.queryItems = [ URLQueryItem(name: "id", value: id) ]
-        }
+        urlComponents.path = id != nil ? path + "/\(id ?? "")" : path
 
-        guard let url = components.url else {
+        guard let url = urlComponents.url else {
             throw URLError(.badURL)
         }
         return url
@@ -196,8 +185,6 @@ final class DefaultNetworkingService: NetworkingService {
         request.httpMethod = "POST"
         request.setValue("Bearer \(Session.shared.token)", forHTTPHeaderField: "Authorization")
         request.setValue(String(revision), forHTTPHeaderField: "X-Last-Known-Revision")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpBody = body
         return request
     }
@@ -206,6 +193,7 @@ final class DefaultNetworkingService: NetworkingService {
         var request = URLRequest(url: url, timeoutInterval: timeoutForRequest)
         request.httpMethod = "PUT"
         request.setValue("Bearer \(Session.shared.token)", forHTTPHeaderField: "Authorization")
+        request.setValue(String(revision), forHTTPHeaderField: "X-Last-Known-Revision")
         request.httpBody = body
         return request
     }
@@ -226,7 +214,7 @@ final class DefaultNetworkingService: NetworkingService {
             deadLineTimeIntervalSince1970: Double(item.deadline ?? 0) == 0 ? nil : Double(item.deadline ?? 0),
             isDone: item.isDone,
             startTimeIntervalSince1970: Double(item.startTime),
-            changeTimeIntervalSince1970: Double(item.changeTime ?? 0) == 0 ? nil : Double(item.changeTime ?? 0))
+            changeTimeIntervalSince1970: Double(item.changeTime) == 0 ? nil : Double(item.changeTime))
     }
 
     private func gatherToDoItemForServer(_ item: ToDoItem) -> ToDoItemServer {
@@ -234,11 +222,15 @@ final class DefaultNetworkingService: NetworkingService {
             id: item.id,
             text: item.text,
             importance: item.importance.rawValue,
-            deadline: Int64(item.deadLine?.timeIntervalSince1970 ?? 0) == 0 ? nil : Int64(item.deadLine?.timeIntervalSince1970 ?? 0),
+            deadline: Int64(item.deadLine?.timeIntervalSince1970 ?? 0) == 0
+            ? nil
+            : Int64(item.deadLine?.timeIntervalSince1970 ?? 0),
             isDone: item.isDone,
             color: nil,
             startTime: Int64(item.startTime.timeIntervalSince1970),
-            changeTime: Int64(item.changeTime?.timeIntervalSince1970 ?? 0) == 0 ? Int64(item.startTime.timeIntervalSince1970) : Int64(item.changeTime?.timeIntervalSince1970 ?? 0),
+            changeTime: Int64(item.changeTime?.timeIntervalSince1970 ?? 0) == 0
+            ? Int64(item.startTime.timeIntervalSince1970)
+            : Int64(item.changeTime?.timeIntervalSince1970 ?? 0),
             lastUpdatedBy: deviceId
         )
     }

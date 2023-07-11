@@ -7,8 +7,9 @@
 
 import UIKit
 
+@MainActor
 protocol ItemIsDoneChangable: AnyObject {
-    func itemIsDoneChanged(item: ToDoItem)
+    func itemIsDoneChangedCondition(_ item: ToDoItem)
 }
 
 class ItemListCell: UITableViewCell {
@@ -73,7 +74,6 @@ class ItemListCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         configureDoneButtonImage()
-        configureBriefTextDefault()
         configureBriefTextLabel()
     }
 
@@ -81,7 +81,6 @@ class ItemListCell: UITableViewCell {
         super.init(coder: coder)
 
         configureDoneButtonImage()
-        configureBriefTextDefault()
         configureBriefTextLabel()
     }
 
@@ -121,6 +120,19 @@ class ItemListCell: UITableViewCell {
         bottomSeparator?.isHidden = hidesBottomSeparator
     }
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        briefTextLabel.attributedText = nil
+        briefTextLabel.text = nil
+        briefTextLabel.textColor = Colors.labelPrimary.value
+        doneItemButton.setImage(UIImage(
+            systemName: "circle")?
+            .withTintColor(
+                Colors.supportSeparator.value,
+                renderingMode: .alwaysOriginal), for: .normal)
+    }
+
     // MARK: - Configure functions
 
     func configureCell(rowInSection: Int, currentRow: Int, hasDeadLine: Bool, lastCell: Bool) {
@@ -129,6 +141,10 @@ class ItemListCell: UITableViewCell {
         selectionStyle = .none
 
         backgroundColor = Colors.backSecondary.value
+
+        if cellType == .last {
+            configureBriefTextDefault()
+        }
 
         if hasDeadLine {
             configureDeadLineLabel()
@@ -190,7 +206,11 @@ class ItemListCell: UITableViewCell {
         }
     }
 
-    private func configureImportanceImage(importance: Importance, text: String, isDoneItem: Bool) -> NSMutableAttributedString {
+    private func configureImportanceImage(
+        importance: Importance,
+        text: String,
+        isDoneItem: Bool
+    ) -> NSMutableAttributedString {
         let fullString: NSMutableAttributedString
         if importance == .common {
             fullString = NSMutableAttributedString(string: text)
@@ -283,7 +303,7 @@ class ItemListCell: UITableViewCell {
                     : self.configureDoneItemImageDefault()), for: .normal)
         })
 
-        delegate?.itemIsDoneChanged(item: item)
+        delegate?.itemIsDoneChangedCondition(item)
     }
 
     private func configureDoneItemImageDefault() -> UIImage? {

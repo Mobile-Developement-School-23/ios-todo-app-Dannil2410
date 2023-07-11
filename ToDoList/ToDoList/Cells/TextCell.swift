@@ -7,6 +7,7 @@
 
 import UIKit
 
+@MainActor
 protocol TextCellHeightUpdatable: AnyObject {
     func updateTextCellHeight(to height: CGFloat)
 }
@@ -123,7 +124,7 @@ extension TextCell: UITextViewDelegate {
     func textViewDidEndEditing(_ textView: UITextView) {
         if !textView.hasText {
             textView.textColor = Colors.labelTeritary.value
-            
+
             textView.text = "Что надо сделать?"
         }
     }
