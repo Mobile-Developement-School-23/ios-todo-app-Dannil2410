@@ -252,10 +252,6 @@ extension ItemsListViewController: UITableViewDataSource {
             .present(UINavigationController(rootViewController: itemViewController), animated: true)
     }
 
-    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        return indexPath.row == rowsCount || showOrHide == .hide ? false : true
-    }
-
     func tableView(
         _ tableView: UITableView,
         leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath
@@ -276,10 +272,6 @@ extension ItemsListViewController: UITableViewDataSource {
                 } else if let index = FileCache.firstIndexOf(id: isDoneItem.id, in: self.serverItems) {
                     self.serverItems[index] = isDoneItem
                 }
-                self.items = (self.networkService.isDirty
-                              ? self.fileCache.items
-                              : self.serverItems)
-                .filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime }
 
                 self.postOrPutToServer(method: .put, item: isDoneItem)
                 NotificationCenter
@@ -289,13 +281,24 @@ extension ItemsListViewController: UITableViewDataSource {
                         object: nil
                     )
 
-                tableView.beginUpdates()
-                tableView.deleteRows(at: [indexPath], with: .right)
-                if indexPath.row == 0 {
-                    tableView
-                        .reloadRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .left)
-                }
-                tableView.endUpdates()
+                self.items = (self.networkService.isDirty
+                              ? self.fileCache.items
+                              : self.serverItems)
+                .filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime }
+//                tableView.beginUpdates()
+//                self.items = (self.networkService.isDirty
+//                              ? self.fileCache.items
+//                              : self.serverItems)
+//                .filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime }
+//
+//                tableView.deleteRows(at: [indexPath], with: .right)
+//                if indexPath.row == 0 {
+//                    tableView
+//                        .reloadRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .left)
+//                }
+//                tableView.endUpdates()
+
+                tableView.reloadData()
             }
             completionHandler(true)
         }
@@ -303,6 +306,9 @@ extension ItemsListViewController: UITableViewDataSource {
         action.image = UIImage(systemName: "checkmark.circle.fill", withConfiguration: circleConfig)
         action.backgroundColor = Colors.colorGreen.value
 
+        if indexPath.row == rowsCount || showOrHide == .hide {
+            return nil
+        }
         return UISwipeActionsConfiguration(actions: [action])
     }
 
@@ -320,13 +326,14 @@ extension ItemsListViewController: UITableViewDataSource {
                     self.serverItems.remove(at: index)
                 }
                 self.deleteItemFromServer(deletedItem: deletedItem)
-                tableView.beginUpdates()
-                tableView.deleteRows(at: [indexPath], with: .fade)
-                if indexPath.row == 0 {
-                    tableView
-                        .reloadRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .fade)
-                }
-                tableView.endUpdates()
+//                tableView.beginUpdates()
+//                tableView.deleteRows(at: [indexPath], with: .fade)
+//                if indexPath.row == 0 {
+//                    tableView
+//                        .reloadRows(at: [IndexPath(row: indexPath.row + 1, section: indexPath.section)], with: .fade)
+//                }
+//                tableView.endUpdates()
+                tableView.reloadData()
             }
             completionHandler(true)
         }
@@ -487,6 +494,8 @@ extension ItemsListViewController: ItemIsDoneChangable {
             self.serverItems[index] = updateItem
         }
 
+        postOrPutToServer(method: .put, item: updateItem)
+
         let currentItemIndex = self.items.firstIndex(where: { $0.id == item.id})
         self.items[currentItemIndex ?? 0] = updateItem
 
@@ -515,8 +524,8 @@ extension ItemsListViewController {
                     fileCache.deleteAll()
                 } else {
                     serverItems = try await networkService.fetchItems()
-                    items = serverItems.filter({ $0.isDone == false }).sorted { $0.startTime > $1.startTime}
                 }
+                items = serverItems.filter({ $0.isDone == false }).sorted { $0.startTime > $1.startTime}
                 await MainActor.run(body: {
                     cancelDownloadAnimation()
                     self.tableView.reloadData()
