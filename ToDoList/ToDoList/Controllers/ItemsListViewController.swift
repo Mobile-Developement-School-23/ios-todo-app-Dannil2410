@@ -22,11 +22,12 @@ class ItemsListViewController: UIViewController {
         return dateFormatter
     }()
 
-    private let fileCache = FileCache()
+    private let fileCache = FileCache(filename: "test", type: .json)
+    private var sqliteHelper: SQLiteHelper?
     private let userDefaults = UserDefaults.standard
+    private var isToDoItemTableCreated: Bool = false
 
     private var items: [ToDoItem] = [ToDoItem]()
-//    private var serverItems: [ToDoItem]?
     private var serverItems: [ToDoItem] = [ToDoItem]()
 
     private var rowsCount: Int {
@@ -70,9 +71,15 @@ class ItemsListViewController: UIViewController {
                 name: UIApplication.didEnterBackgroundNotification,
                 object: nil)
 
+        isToDoItemTableCreated = userDefaults.bool(forKey: "ToDoItemTableCreated")
         do {
-            try fileCache.loadItemsFromFileSystem(fileName: "test", type: .json)
-            items = fileCache.items.filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime}
+            sqliteHelper = try SQLiteHelper()
+            if !isToDoItemTableCreated {
+                try sqliteHelper?.createTable()
+                userDefaults.set(true, forKey: "ToDoItemTableCreated")
+            }
+            try sqliteHelper?.load()
+            items = sqliteHelper?.items.filter({$0.isDone == false}) ?? []
         } catch let error {
             print(error)
         }
@@ -81,14 +88,7 @@ class ItemsListViewController: UIViewController {
     }
 
     @objc private func saveItems() {
-        do {
-            if networkService.isDirty {
-                try fileCache.saveItemsToFileSystem(fileName: "test", type: .json)
-
-            }
-        } catch let error {
-            print(error)
-        }
+        userDefaults.set(networkService.isDirty, forKey: "isDirty")
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -267,10 +267,15 @@ extension ItemsListViewController: UITableViewDataSource {
                     isDone: true,
                     startTimeIntervalSince1970: self.items[indexPath.row].startTime.timeIntervalSince1970,
                     changeTimeIntervalSince1970: Date.now.timeIntervalSince1970)
-                if self.networkService.isDirty {
-                    self.fileCache.appendItem(isDoneItem)
-                } else if let index = FileCache.firstIndexOf(id: isDoneItem.id, in: self.serverItems) {
+                if !self.networkService.isDirty,
+                   let index = FileCache.firstIndexOf(id: isDoneItem.id, in: self.serverItems) {
                     self.serverItems[index] = isDoneItem
+                }
+
+                do {
+                    try self.sqliteHelper?.insert(item: isDoneItem)
+                } catch {
+                    print(error)
                 }
 
                 self.postOrPutToServer(method: .put, item: isDoneItem)
@@ -282,7 +287,7 @@ extension ItemsListViewController: UITableViewDataSource {
                     )
 
                 self.items = (self.networkService.isDirty
-                              ? self.fileCache.items
+                              ? self.sqliteHelper?.items ?? []
                               : self.serverItems)
                 .filter({$0.isDone == false}).sorted { $0.startTime > $1.startTime }
 //                tableView.beginUpdates()
@@ -320,11 +325,17 @@ extension ItemsListViewController: UITableViewDataSource {
             guard let self = self else { return }
             if indexPath.row != self.rowsCount {
                 let deletedItem = self.items.remove(at: indexPath.row)
-                if self.networkService.isDirty {
-                    self.fileCache.deleteItem(for: deletedItem.id)
-                } else if let index = FileCache.firstIndexOf(id: deletedItem.id, in: self.serverItems) {
+                if !self.networkService.isDirty,
+                   let index = FileCache.firstIndexOf(id: deletedItem.id, in: self.serverItems) {
                     self.serverItems.remove(at: index)
                 }
+
+                do {
+                    try self.sqliteHelper?.delete(for: deletedItem.id)
+                } catch {
+                    print(error)
+                }
+
                 self.deleteItemFromServer(deletedItem: deletedItem)
 //                tableView.beginUpdates()
 //                tableView.deleteRows(at: [indexPath], with: .fade)
@@ -350,7 +361,7 @@ extension ItemsListViewController: UITableViewDelegate {
         let headerForSectionView = HeaderForSectionView()
         headerForSectionView
             .configureView(
-                countDoneItems: (networkService.isDirty ? fileCache.items : serverItems)
+                countDoneItems: (sqliteHelper?.items ?? [])
                     .map({$0.isDone})
                     .filter({$0 == true})
                     .count
@@ -380,18 +391,25 @@ extension ItemsListViewController: TableViewRowAppendable {
     func updateTableView(showOrHideAncestor: ShowAction, method: RequestMethod, item: ToDoItem) {
         toDoChangeInLists(method: method, item: item)
 
-        switch method {
-        case .delete:
-            deleteItemFromServer(deletedItem: item)
-        default:
-            postOrPutToServer(method: method, item: item)
+        do {
+            switch method {
+            case .delete:
+                try sqliteHelper?.delete(for: item.id)
+                deleteItemFromServer(deletedItem: item)
+            default:
+                try sqliteHelper?.insert(item: item)
+                postOrPutToServer(method: method, item: item)
+            }
+        } catch {
+            print(error)
         }
 
         if networkService.isDirty {
             items = (showOrHideAncestor == .hide
-                     ? fileCache.items
-                     : fileCache.items.filter({$0.isDone == false}))
+                     ? sqliteHelper?.items ?? []
+                     : sqliteHelper?.items.filter({$0.isDone == false}) ?? [])
             .sorted { $0.startTime > $1.startTime}
+            print(items.map({$0.text}))
         } else {
             items = (showOrHideAncestor == .hide
                      ? serverItems
@@ -413,9 +431,9 @@ extension ItemsListViewController: TableViewRowAppendable {
             }
         } else {
             if method == .delete {
-                fileCache.deleteItem(for: item.id)
+                fileCache.delete(for: item.id)
             } else {
-                fileCache.appendItem(item)
+                fileCache.append(item)
             }
         }
     }
@@ -427,7 +445,7 @@ extension ItemsListViewController: ShowOrHideMakable {
         case .hide:
             showOrHide = .hide
             var itemsIsDoneWithDeadLine = (networkService.isDirty
-                                           ? fileCache.items
+                                           ? sqliteHelper?.items ?? []
                                            : serverItems)
                 .filter({$0.isDone == true})
             for index in 0..<itemsIsDoneWithDeadLine.count {
@@ -440,17 +458,16 @@ extension ItemsListViewController: ShowOrHideMakable {
                     isDone: item.isDone,
                     startTimeIntervalSince1970: item.startTime.timeIntervalSince1970,
                     changeTimeIntervalSince1970: item.changeTime?.timeIntervalSince1970)
-                if networkService.isDirty {
-                    fileCache.appendItem(itemsIsDoneWithDeadLine[index])
-                } else if let firstIndexOf = FileCache.firstIndexOf(id: item.id, in: serverItems) {
+                if !networkService.isDirty,
+                   let firstIndexOf = FileCache.firstIndexOf(id: item.id, in: serverItems) {
                     serverItems[firstIndexOf] = itemsIsDoneWithDeadLine[index]
                 }
             }
-            items = (networkService.isDirty ? fileCache.items : serverItems)
+            items = (networkService.isDirty ? sqliteHelper?.items ?? [] : serverItems)
                 .sorted { $0.startTime > $1.startTime}
         case .show:
             showOrHide = .show
-            items = (networkService.isDirty ? fileCache.items : serverItems)
+            items = (networkService.isDirty ? sqliteHelper?.items ?? [] : serverItems)
                 .filter({$0.isDone == false})
                 .sorted { $0.startTime > $1.startTime}
         }
@@ -488,10 +505,15 @@ extension ItemsListViewController: ItemIsDoneChangable {
             startTimeIntervalSince1970: Date.now.timeIntervalSince1970,
             changeTimeIntervalSince1970: nil)
 
-        if networkService.isDirty {
-            fileCache.appendItem(updateItem)
-        } else if let index = FileCache.firstIndexOf(id: updateItem.id, in: serverItems) {
+        if !networkService.isDirty,
+           let index = FileCache.firstIndexOf(id: updateItem.id, in: serverItems) {
             self.serverItems[index] = updateItem
+        }
+
+        do {
+            try sqliteHelper?.insert(item: updateItem)
+        } catch {
+            print(error)
         }
 
         postOrPutToServer(method: .put, item: updateItem)
@@ -519,11 +541,14 @@ extension ItemsListViewController {
     func firstSynchronization() {
         Task {
             do {
-                if fileCache.items.count > 0 {
-                    serverItems = try await networkService.patch(for: fileCache.items)
-                    fileCache.deleteAll()
+                if userDefaults.bool(forKey: "isDirty") {
+                    print("1")
+                    print(sqliteHelper?.items.count)
+                    serverItems = try await networkService.patch(for: sqliteHelper?.items ?? [])
                 } else {
+                    print("2")
                     serverItems = try await networkService.fetchItems()
+                    try sqliteHelper?.updateItemsIntoDatabase(using: serverItems)
                 }
                 items = serverItems.filter({ $0.isDone == false }).sorted { $0.startTime > $1.startTime}
                 await MainActor.run(body: {
@@ -553,16 +578,15 @@ extension ItemsListViewController {
         Task {
             var isDifferentRevision = false
             do {
-                if self.networkService.isDirty {
-                    serverItems = try await self.networkService.patch(for: self.fileCache.items)
-                    fileCache.deleteAll()
+                if networkService.isDirty {
+                    serverItems = try await networkService.patch(for: sqliteHelper?.items ?? [])
                 }
+                try sqliteHelper?.delete(for: deletedItem.id)
                 try await self.networkService.delete(for: deletedItem)
             } catch let error as RequestError {
                 if error == .wrongRequest {
                     isDifferentRevision = true
                 } else if error == .serverError {
-                    serverItems.forEach { item in fileCache.appendItem(item) }
                     await MainActor.run(body: { self.show(message: error.localizedDescription) })
                 }
             } catch { networkService.isDirty = true }
@@ -578,7 +602,6 @@ extension ItemsListViewController {
             do {
                 if networkService.isDirty {
                     serverItems = try await networkService.patch(for: fileCache.items)
-                    fileCache.deleteAll()
                 }
                 switch method {
                 case .post: try await networkService.post(for: item)
@@ -589,10 +612,11 @@ extension ItemsListViewController {
                 if error == .wrongRequest {
                     isDifferentRevision = true
                 } else if error == .serverError {
-                    serverItems.forEach { item in fileCache.appendItem(item) }
                     await MainActor.run(body: { self.show(message: error.localizedDescription) })
                 }
-            } catch { networkService.isDirty = true }
+            } catch {
+                networkService.isDirty = true
+            }
             if isDifferentRevision {
                 await toDoIfDifferentRevision(method: method, item: item)
             }
@@ -613,9 +637,6 @@ extension ItemsListViewController {
                 try await networkService.put(for: item)
             }
         } catch let error as RequestError {
-            if error == .serverError {
-                serverItems.forEach { item in fileCache.appendItem(item) }
-            }
             await MainActor.run(body: { show(message: error.localizedDescription) })
         } catch { networkService.isDirty = true }
     }

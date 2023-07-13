@@ -45,6 +45,8 @@
 		C8AE7F762A57EF81002ADC4E /* RequestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F752A57EF81002ADC4E /* RequestError.swift */; };
 		C8AE7F7A2A58578D002ADC4E /* DownloadAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F792A58578D002ADC4E /* DownloadAnimationView.swift */; };
 		C8AE7F7C2A586888002ADC4E /* UIViewControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7F7B2A586888002ADC4E /* UIViewControllerExtension.swift */; };
+		C8AE7FAB2A5F3D7B002ADC4E /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = C8AE7FAA2A5F3D7B002ADC4E /* SQLite */; };
+		C8AE7FAD2A5F3DA4002ADC4E /* SQLiteHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8AE7FAC2A5F3DA4002ADC4E /* SQLiteHelper.swift */; };
 		C8CE8DF82A389472002A2A00 /* FileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CE8DF72A389472002A2A00 /* FileCache.swift */; };
 /* End PBXBuildFile section */
 
@@ -110,6 +112,7 @@
 		C8AE7F752A57EF81002ADC4E /* RequestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestError.swift; sourceTree = "<group>"; };
 		C8AE7F792A58578D002ADC4E /* DownloadAnimationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadAnimationView.swift; sourceTree = "<group>"; };
 		C8AE7F7B2A586888002ADC4E /* UIViewControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewControllerExtension.swift; sourceTree = "<group>"; };
+		C8AE7FAC2A5F3DA4002ADC4E /* SQLiteHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteHelper.swift; sourceTree = "<group>"; };
 		C8CE8DF72A389472002A2A00 /* FileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCache.swift; sourceTree = "<group>"; };
 		F02811785B4913DC71809208 /* Pods-ToDoListTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ToDoListTests.debug.xcconfig"; path = "Target Support Files/Pods-ToDoListTests/Pods-ToDoListTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -119,6 +122,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C8AE7FAB2A5F3D7B002ADC4E /* SQLite in Frameworks */,
 				C8AE7F132A4F8BFE002ADC4E /* CocoaLumberjack in Frameworks */,
 				850922540173589B3A2173AB /* Pods_ToDoList.framework in Frameworks */,
 				C8AE7F172A4F8BFE002ADC4E /* CocoaLumberjackSwiftLogBackend in Frameworks */,
@@ -313,6 +317,7 @@
 			isa = PBXGroup;
 			children = (
 				C8CE8DF72A389472002A2A00 /* FileCache.swift */,
+				C8AE7FAC2A5F3DA4002ADC4E /* SQLiteHelper.swift */,
 			);
 			path = Cache;
 			sourceTree = "<group>";
@@ -339,6 +344,7 @@
 				C8AE7F122A4F8BFE002ADC4E /* CocoaLumberjack */,
 				C8AE7F142A4F8BFE002ADC4E /* CocoaLumberjackSwift */,
 				C8AE7F162A4F8BFE002ADC4E /* CocoaLumberjackSwiftLogBackend */,
+				C8AE7FAA2A5F3D7B002ADC4E /* SQLite */,
 			);
 			productName = ToDoList;
 			productReference = C8686A772A375561000C9CF3 /* ToDoList.app */;
@@ -416,6 +422,7 @@
 			mainGroup = C8686A6E2A375561000C9CF3;
 			packageReferences = (
 				C8AE7F112A4F8BFE002ADC4E /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
+				C8AE7FA92A5F3D7B002ADC4E /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 			);
 			productRefGroup = C8686A782A375561000C9CF3 /* Products */;
 			projectDirPath = "";
@@ -573,6 +580,7 @@
 				C8686A852A375561000C9CF3 /* ToDoList.xcdatamodeld in Sources */,
 				C8AE7F6D2A560150002ADC4E /* ToDoItemServer.swift in Sources */,
 				C8AE7F6B2A55FC67002ADC4E /* DefaultNetworkingService.swift in Sources */,
+				C8AE7FAD2A5F3DA4002ADC4E /* SQLiteHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -932,6 +940,14 @@
 				minimumVersion = 3.0.0;
 			};
 		};
+		C8AE7FA92A5F3D7B002ADC4E /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -949,6 +965,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C8AE7F112A4F8BFE002ADC4E /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
+		};
+		C8AE7FAA2A5F3D7B002ADC4E /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C8AE7FA92A5F3D7B002ADC4E /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
 		};
 /* End XCSwiftPackageProductDependency section */
 

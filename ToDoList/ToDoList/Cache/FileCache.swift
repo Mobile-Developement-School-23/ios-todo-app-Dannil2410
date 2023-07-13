@@ -12,7 +12,15 @@ enum FileType: String {
     case csv = ".csv"
 }
 
-class FileCache {
+protocol Persistencable: AnyObject {
+    func save() throws
+    func load() throws
+}
+
+class FileCache: Persistencable {
+
+    // MARK: - Properties
+
     private(set) var items = [ToDoItem]()
 
     private var firstCsvString = ToDoItem.elementsOrder
@@ -21,7 +29,17 @@ class FileCache {
         return itemsList.map({$0.id}).firstIndex(of: id)
     }
 
-    func appendItem(_ item: ToDoItem) {
+    private let filename: String
+    private let type: FileType
+
+    init(filename: String, type: FileType) {
+        self.filename = filename
+        self.type = type
+    }
+
+    // MARK: - Public functions
+
+    func append(_ item: ToDoItem) {
         if let index = FileCache.firstIndexOf(id: item.id, in: items) {
             items[index] = item
         } else {
@@ -29,7 +47,7 @@ class FileCache {
         }
     }
 
-    func deleteItem(for id: String) {
+    func delete(for id: String) {
         if let index = FileCache.firstIndexOf(id: id, in: items) {
             items.remove(at: index)
         }
@@ -38,6 +56,16 @@ class FileCache {
     func deleteAll() {
         items = []
     }
+
+    func save() throws {
+        try saveItemsToFileSystem(fileName: filename, type: type)
+    }
+
+    func load() throws {
+        try loadItemsFromFileSystem(fileName: filename, type: type)
+    }
+
+    // MARK: - Private functions
 
     private func getFilePath(fileName: String, type: FileType) -> URL? {
         guard let documentDirectory = FileManager
@@ -52,7 +80,7 @@ class FileCache {
 
     }
 
-    func saveItemsToFileSystem(fileName: String, type: FileType) throws {
+    private func saveItemsToFileSystem(fileName: String, type: FileType) throws {
         guard let filePath = getFilePath(fileName: fileName, type: type) else { return }
         print(filePath)
 
@@ -88,7 +116,7 @@ class FileCache {
         return nil
     }
 
-    func loadItemsFromFileSystem(fileName: String, type: FileType) throws {
+    private func loadItemsFromFileSystem(fileName: String, type: FileType) throws {
         if let data = try loadDataFromFileSystem(fileName: fileName, type: type) {
             switch type {
             case .json:

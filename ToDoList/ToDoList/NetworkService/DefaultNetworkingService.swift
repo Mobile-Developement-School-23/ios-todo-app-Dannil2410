@@ -53,7 +53,6 @@ final class DefaultNetworkingService: NetworkingService {
 
         let (data, response) = try await session.data(for: gatherGetRequest(url: url))
 
-        print(String(data: data, encoding: .utf8)!)
         try typeOfResponse(code: (response as? HTTPURLResponse)?.statusCode ?? 0)
 
         let responseServer = try JSONDecoder().decode(ListResponseServer.self, from: data)
