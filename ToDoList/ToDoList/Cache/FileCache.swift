@@ -12,22 +12,19 @@ enum FileType: String {
     case csv = ".csv"
 }
 
+@MainActor
 protocol Persistencable: AnyObject {
     func save() throws
     func load() throws
 }
 
-class FileCache: Persistencable {
+final class FileCache: Persistencable, FirstIndexByGettable {
 
     // MARK: - Properties
 
     private(set) var items = [ToDoItem]()
 
     private var firstCsvString = ToDoItem.elementsOrder
-
-    static func firstIndexOf(id: String, in itemsList: [ToDoItem]) -> Int? {
-        return itemsList.map({$0.id}).firstIndex(of: id)
-    }
 
     private let filename: String
     private let type: FileType
@@ -40,7 +37,7 @@ class FileCache: Persistencable {
     // MARK: - Public functions
 
     func append(_ item: ToDoItem) {
-        if let index = FileCache.firstIndexOf(id: item.id, in: items) {
+        if let index = firstIndexBy(id: item.id, in: items) {
             items[index] = item
         } else {
             items.append(item)
@@ -48,7 +45,7 @@ class FileCache: Persistencable {
     }
 
     func delete(for id: String) {
-        if let index = FileCache.firstIndexOf(id: id, in: items) {
+        if let index = firstIndexBy(id: id, in: items) {
             items.remove(at: index)
         }
     }

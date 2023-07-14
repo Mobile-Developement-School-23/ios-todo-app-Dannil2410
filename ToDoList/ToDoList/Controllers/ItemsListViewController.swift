@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ItemsListViewController: UIViewController {
+class ItemsListViewController: UIViewController, FirstIndexByGettable {
 
     // MARK: - Properties
 
@@ -24,7 +24,9 @@ class ItemsListViewController: UIViewController {
 
     private let fileCache = FileCache(filename: "test", type: .json)
     private var sqliteHelper: SQLiteHelper?
+    private let coreDataManager = CoreDataManager.shared
     private let userDefaults = UserDefaults.standard
+
     private var isToDoItemTableCreated: Bool = false
 
     private var items: [ToDoItem] = [ToDoItem]()
@@ -79,7 +81,9 @@ class ItemsListViewController: UIViewController {
                 userDefaults.set(true, forKey: "ToDoItemTableCreated")
             }
             try sqliteHelper?.load()
+            coreDataManager.load()
             items = sqliteHelper?.items.filter({$0.isDone == false}) ?? []
+            // items = coreDataManager.items.filter({$0.isDone == false})
         } catch let error {
             print(error)
         }
@@ -113,6 +117,8 @@ class ItemsListViewController: UIViewController {
     }
 
     private func configureTableView() {
+        tableView.isHidden = true
+
         tableView.backgroundColor = .clear
 
         tableView.separatorColor = Colors.supportSeparator.value
@@ -199,7 +205,6 @@ class ItemsListViewController: UIViewController {
 
         downloadAnimationView.isHidden = true
     }
-
 }
 
 extension ItemsListViewController: UITableViewDataSource {
@@ -268,12 +273,13 @@ extension ItemsListViewController: UITableViewDataSource {
                     startTimeIntervalSince1970: self.items[indexPath.row].startTime.timeIntervalSince1970,
                     changeTimeIntervalSince1970: Date.now.timeIntervalSince1970)
                 if !self.networkService.isDirty,
-                   let index = FileCache.firstIndexOf(id: isDoneItem.id, in: self.serverItems) {
+                   let index = self.firstIndexBy(id: isDoneItem.id, in: self.serverItems) {
                     self.serverItems[index] = isDoneItem
                 }
 
                 do {
                     try self.sqliteHelper?.insert(item: isDoneItem)
+                    self.coreDataManager.update(for: isDoneItem)
                 } catch {
                     print(error)
                 }
@@ -326,12 +332,13 @@ extension ItemsListViewController: UITableViewDataSource {
             if indexPath.row != self.rowsCount {
                 let deletedItem = self.items.remove(at: indexPath.row)
                 if !self.networkService.isDirty,
-                   let index = FileCache.firstIndexOf(id: deletedItem.id, in: self.serverItems) {
+                   let index = self.firstIndexBy(id: deletedItem.id, in: self.serverItems) {
                     self.serverItems.remove(at: index)
                 }
 
                 do {
                     try self.sqliteHelper?.delete(for: deletedItem.id)
+                    self.coreDataManager.delete(for: deletedItem.id)
                 } catch {
                     print(error)
                 }
@@ -395,9 +402,13 @@ extension ItemsListViewController: TableViewRowAppendable {
             switch method {
             case .delete:
                 try sqliteHelper?.delete(for: item.id)
+                coreDataManager.delete(for: item.id)
                 deleteItemFromServer(deletedItem: item)
             default:
                 try sqliteHelper?.insert(item: item)
+                if method == .post {
+                    coreDataManager.insert(for: item)
+                } else if method == .put { coreDataManager.update(for: item)}
                 postOrPutToServer(method: method, item: item)
             }
         } catch {
@@ -409,7 +420,6 @@ extension ItemsListViewController: TableViewRowAppendable {
                      ? sqliteHelper?.items ?? []
                      : sqliteHelper?.items.filter({$0.isDone == false}) ?? [])
             .sorted { $0.startTime > $1.startTime}
-            print(items.map({$0.text}))
         } else {
             items = (showOrHideAncestor == .hide
                      ? serverItems
@@ -422,18 +432,12 @@ extension ItemsListViewController: TableViewRowAppendable {
     private func toDoChangeInLists(method: RequestMethod, item: ToDoItem) {
         if !networkService.isDirty {
             if method == .delete,
-               let index = FileCache.firstIndexOf(id: item.id, in: serverItems) {
+               let index = firstIndexBy(id: item.id, in: serverItems) {
                 self.serverItems.remove(at: index)
-            } else if let index = FileCache.firstIndexOf(id: item.id, in: serverItems) {
+            } else if let index = firstIndexBy(id: item.id, in: serverItems) {
                 self.serverItems[index] = item
             } else {
                 self.serverItems.append(item)
-            }
-        } else {
-            if method == .delete {
-                fileCache.delete(for: item.id)
-            } else {
-                fileCache.append(item)
             }
         }
     }
@@ -459,7 +463,7 @@ extension ItemsListViewController: ShowOrHideMakable {
                     startTimeIntervalSince1970: item.startTime.timeIntervalSince1970,
                     changeTimeIntervalSince1970: item.changeTime?.timeIntervalSince1970)
                 if !networkService.isDirty,
-                   let firstIndexOf = FileCache.firstIndexOf(id: item.id, in: serverItems) {
+                   let firstIndexOf = firstIndexBy(id: item.id, in: serverItems) {
                     serverItems[firstIndexOf] = itemsIsDoneWithDeadLine[index]
                 }
             }
@@ -506,12 +510,13 @@ extension ItemsListViewController: ItemIsDoneChangable {
             changeTimeIntervalSince1970: nil)
 
         if !networkService.isDirty,
-           let index = FileCache.firstIndexOf(id: updateItem.id, in: serverItems) {
+           let index = firstIndexBy(id: updateItem.id, in: serverItems) {
             self.serverItems[index] = updateItem
         }
 
         do {
             try sqliteHelper?.insert(item: updateItem)
+            coreDataManager.update(for: updateItem)
         } catch {
             print(error)
         }
@@ -542,23 +547,24 @@ extension ItemsListViewController {
         Task {
             do {
                 if userDefaults.bool(forKey: "isDirty") {
-                    print("1")
-                    print(sqliteHelper?.items.count)
                     serverItems = try await networkService.patch(for: sqliteHelper?.items ?? [])
+//                    serverItems = try await networkService.patch(for: coreDataManager.items)
                 } else {
-                    print("2")
                     serverItems = try await networkService.fetchItems()
                     try sqliteHelper?.updateItemsIntoDatabase(using: serverItems)
+                    coreDataManager.updateItemsIntoDatabase(using: serverItems)
                 }
                 items = serverItems.filter({ $0.isDone == false }).sorted { $0.startTime > $1.startTime}
                 await MainActor.run(body: {
                     cancelDownloadAnimation()
+                    tableView.isHidden = false
                     self.tableView.reloadData()
                 })
             } catch let error as RequestError {
                 if error == .serverError {
                     await MainActor.run(body: {
                         cancelDownloadAnimation()
+                        tableView.isHidden = false
                         self.show(message: error.localizedDescription)
                     })
                 }
@@ -566,6 +572,7 @@ extension ItemsListViewController {
                 networkService.isDirty = true
                 await MainActor.run(body: {
                     cancelDownloadAnimation()
+                    tableView.isHidden = false
                     if error.localizedDescription == "The request timed out." {
                         presentError(error: error)
                     }
@@ -581,7 +588,6 @@ extension ItemsListViewController {
                 if networkService.isDirty {
                     serverItems = try await networkService.patch(for: sqliteHelper?.items ?? [])
                 }
-                try sqliteHelper?.delete(for: deletedItem.id)
                 try await self.networkService.delete(for: deletedItem)
             } catch let error as RequestError {
                 if error == .wrongRequest {
@@ -601,7 +607,7 @@ extension ItemsListViewController {
             var isDifferentRevision = false
             do {
                 if networkService.isDirty {
-                    serverItems = try await networkService.patch(for: fileCache.items)
+                    serverItems = try await networkService.patch(for: sqliteHelper?.items ?? [])
                 }
                 switch method {
                 case .post: try await networkService.post(for: item)

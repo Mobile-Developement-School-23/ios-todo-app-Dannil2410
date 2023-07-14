@@ -31,6 +31,9 @@
 		C8686A9F2A375563000C9CF3 /* ToDoListUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686A9E2A375563000C9CF3 /* ToDoListUITests.swift */; };
 		C8686AA12A375563000C9CF3 /* ToDoListUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686AA02A375563000C9CF3 /* ToDoListUITestsLaunchTests.swift */; };
 		C8686AAE2A375587000C9CF3 /* ToDoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8686AAD2A375587000C9CF3 /* ToDoItem.swift */; };
+		C873AAE32A61411E005E2CBA /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C873AAE22A61411E005E2CBA /* CoreDataManager.swift */; };
+		C873AAE72A6149C3005E2CBA /* CoreDataToDoItem+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C873AAE62A6149C3005E2CBA /* CoreDataToDoItem+CoreDataClass.swift */; };
+		C873AAE92A6149CF005E2CBA /* CoreDataToDoItem+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C873AAE82A6149CF005E2CBA /* CoreDataToDoItem+CoreDataProperties.swift */; };
 		C89556022A4D607900BC557C /* AddNewItemControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89556012A4D607900BC557C /* AddNewItemControl.swift */; };
 		C89556062A4D953900BC557C /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89556052A4D953900BC557C /* Colors.swift */; };
 		C8AE7F132A4F8BFE002ADC4E /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = C8AE7F122A4F8BFE002ADC4E /* CocoaLumberjack */; };
@@ -101,6 +104,9 @@
 		C8686A9E2A375563000C9CF3 /* ToDoListUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListUITests.swift; sourceTree = "<group>"; };
 		C8686AA02A375563000C9CF3 /* ToDoListUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		C8686AAD2A375587000C9CF3 /* ToDoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItem.swift; sourceTree = "<group>"; };
+		C873AAE22A61411E005E2CBA /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
+		C873AAE62A6149C3005E2CBA /* CoreDataToDoItem+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "CoreDataToDoItem+CoreDataClass.swift"; path = "ToDoList/CoreDataToDoItem+CoreDataClass.swift"; sourceTree = "<group>"; };
+		C873AAE82A6149CF005E2CBA /* CoreDataToDoItem+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "CoreDataToDoItem+CoreDataProperties.swift"; path = "ToDoList/CoreDataToDoItem+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C89556012A4D607900BC557C /* AddNewItemControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNewItemControl.swift; sourceTree = "<group>"; };
 		C89556052A4D953900BC557C /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		C8AE7F682A55F819002ADC4E /* URLSessionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionExtension.swift; sourceTree = "<group>"; };
@@ -208,6 +214,8 @@
 		C8686A6E2A375561000C9CF3 = {
 			isa = PBXGroup;
 			children = (
+				C873AAE62A6149C3005E2CBA /* CoreDataToDoItem+CoreDataClass.swift */,
+				C873AAE82A6149CF005E2CBA /* CoreDataToDoItem+CoreDataProperties.swift */,
 				C8686A792A375561000C9CF3 /* ToDoList */,
 				C8686A932A375563000C9CF3 /* ToDoListTests */,
 				C8686A9D2A375563000C9CF3 /* ToDoListUITests */,
@@ -318,6 +326,7 @@
 			children = (
 				C8CE8DF72A389472002A2A00 /* FileCache.swift */,
 				C8AE7FAC2A5F3DA4002ADC4E /* SQLiteHelper.swift */,
+				C873AAE22A61411E005E2CBA /* CoreDataManager.swift */,
 			);
 			path = Cache;
 			sourceTree = "<group>";
@@ -568,6 +577,7 @@
 				C83C12282A4380D400950448 /* UIViewExtension.swift in Sources */,
 				C8AE7F762A57EF81002ADC4E /* RequestError.swift in Sources */,
 				C83C127A2A4ADE8D00950448 /* HeaderForSectionView.swift in Sources */,
+				C873AAE72A6149C3005E2CBA /* CoreDataToDoItem+CoreDataClass.swift in Sources */,
 				C89556062A4D953900BC557C /* Colors.swift in Sources */,
 				C83C12782A4AD15800950448 /* ShowOrHideControl.swift in Sources */,
 				C8CE8DF82A389472002A2A00 /* FileCache.swift in Sources */,
@@ -578,7 +588,9 @@
 				C83C12262A432F5F00950448 /* DeleteCell.swift in Sources */,
 				C8AE7F722A56071B002ADC4E /* Session.swift in Sources */,
 				C8686A852A375561000C9CF3 /* ToDoList.xcdatamodeld in Sources */,
+				C873AAE32A61411E005E2CBA /* CoreDataManager.swift in Sources */,
 				C8AE7F6D2A560150002ADC4E /* ToDoItemServer.swift in Sources */,
+				C873AAE92A6149CF005E2CBA /* CoreDataToDoItem+CoreDataProperties.swift in Sources */,
 				C8AE7F6B2A55FC67002ADC4E /* DefaultNetworkingService.swift in Sources */,
 				C8AE7FAD2A5F3DA4002ADC4E /* SQLiteHelper.swift in Sources */,
 			);

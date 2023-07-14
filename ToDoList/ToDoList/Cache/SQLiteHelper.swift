@@ -20,6 +20,8 @@ extension FirstIndexByGettable {
 
 final class SQLiteHelper: Persistencable, FirstIndexByGettable {
 
+    // MARK: - Private properties
+
     private(set) var items = [ToDoItem]()
 
     private var database: Connection?
@@ -33,6 +35,16 @@ final class SQLiteHelper: Persistencable, FirstIndexByGettable {
     private let startTime = Expression<Date>("created_at")
     private let changeTime = Expression<Date?>("changed_at")
 
+    // MARK: - Private functions
+
+    private func append(_ item: ToDoItem) {
+        if let index = firstIndexBy(id: item.id, in: items) {
+            items[index] = item
+        } else {
+            items.append(item)
+        }
+    }
+
     init() throws {
         guard let path = NSSearchPathForDirectoriesInDomains(
             .documentDirectory, .userDomainMask, true
@@ -41,6 +53,8 @@ final class SQLiteHelper: Persistencable, FirstIndexByGettable {
         let database = try Connection("\(path)/ToDoItemAppBase.sqlite3")
         self.database = database
     }
+
+    // MARK: - Public functions
 
     func createTable() throws {
         let createTable = toDoItems.create { table in
@@ -54,14 +68,6 @@ final class SQLiteHelper: Persistencable, FirstIndexByGettable {
         }
 
         try database?.run(createTable)
-    }
-
-    func append(_ item: ToDoItem) {
-        if let index = firstIndexBy(id: item.id, in: items) {
-            items[index] = item
-        } else {
-            items.append(item)
-        }
     }
 
     func save() throws {
@@ -108,7 +114,7 @@ final class SQLiteHelper: Persistencable, FirstIndexByGettable {
     func delete(for deletedId: String) throws {
         guard let base = database else { return }
         let deletedItem = toDoItems.filter(id == deletedId)
-        print(try base.run(deletedItem.delete()))
+        try base.run(deletedItem.delete())
         if let index = firstIndexBy(id: deletedId, in: items) {
             items.remove(at: index)
         }
@@ -120,7 +126,6 @@ final class SQLiteHelper: Persistencable, FirstIndexByGettable {
 
         if itemsSet.count > serverItemsSet.count {
             let deleteItems = itemsSet.subtracting(serverItemsSet)
-            print(deleteItems)
             for id in deleteItems {
                 try delete(for: id)
             }
