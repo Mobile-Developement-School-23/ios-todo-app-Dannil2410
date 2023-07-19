@@ -17,15 +17,35 @@ final class CoreDataManager: NSObject, FirstIndexByGettable {
 
     static let shared = CoreDataManager()
 
-    private var appDelegate: AppDelegate? {
-        UIApplication.shared.delegate as? AppDelegate
-    }
-
-    private var context: NSManagedObjectContext? {
-        appDelegate?.persistentContainer.viewContext
-    }
-
     private(set) var items = [ToDoItem]()
+
+    // MARK: - Core Data stack
+
+    private lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "ToDoList")
+        container
+            .loadPersistentStores(
+                completionHandler: { (storeDescription, error) in
+                    if let error = error as NSError? {
+                        fatalError("Unresolved error \(error), \(error.userInfo)")
+                    } else {
+                        print("Database url - ", storeDescription.url ?? "")
+                    }
+                })
+        return container
+    }()
+
+    // MARK: - context for reading
+
+    private var context: NSManagedObjectContext {
+        persistentContainer.viewContext
+    }
+
+    // MARK: - context for writing
+
+    private func backgroundContext() -> NSManagedObjectContext {
+        return persistentContainer.newBackgroundContext()
+    }
 
     // MARK: - Private functions
 
@@ -42,30 +62,35 @@ final class CoreDataManager: NSObject, FirstIndexByGettable {
     // MARK: - Public functions
 
     public func insert(for item: ToDoItem) {
-        guard let context = context,
-              let entityDescription = NSEntityDescription
+        let context = backgroundContext()
+
+        guard let entityDescription = NSEntityDescription
             .entity(
                 forEntityName: "CoreDataToDoItem",
-                in: context
+                in: backgroundContext()
             ) else { return }
 
         let createdItem = CoreDataToDoItem(entity: entityDescription, insertInto: context)
-        createdItem.id = item.id
-        createdItem.text = item.text
-        createdItem.importance = item.importance.rawValue
-        createdItem.deadline = item.deadLine
-        createdItem.isDone = item.isDone
-        createdItem.startTime = item.startTime
-        createdItem.changeTime = item.changeTime
+        do {
+            createdItem.id = item.id
+            createdItem.text = item.text
+            createdItem.importance = item.importance.rawValue
+            createdItem.deadline = item.deadLine
+            createdItem.isDone = item.isDone
+            createdItem.startTime = item.startTime
+            createdItem.changeTime = item.changeTime
 
-        appDelegate?.saveContext()
+            try context.save()
+        } catch {
+            let nserror = error as NSError
+            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+        }
     }
 
     public func load() {
         let request = CoreDataToDoItem.fetchRequest()
 
-        guard let context = context,
-              let items = try? context.fetch(request) as [CoreDataToDoItem] else { return }
+        guard let items = try? context.fetch(request) as [CoreDataToDoItem] else { return }
         self.items = items.map({
             ToDoItem(
                 id: $0.id,
@@ -82,19 +107,24 @@ final class CoreDataManager: NSObject, FirstIndexByGettable {
         let request = CoreDataToDoItem.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", item.id)
 
-        guard let context = context,
-              let items = try? context.fetch(request),
-              let updatedItem = items.first else { return }
+        let context = backgroundContext()
+        do {
+            let items = try context.fetch(request)
+            guard let updatedItem = items.first else { return }
 
-        updatedItem.id = item.id
-        updatedItem.text = item.text
-        updatedItem.importance = item.importance.rawValue
-        updatedItem.deadline = item.deadLine
-        updatedItem.isDone = item.isDone
-        updatedItem.startTime = item.startTime
-        updatedItem.changeTime = item.changeTime
+            updatedItem.id = item.id
+            updatedItem.text = item.text
+            updatedItem.importance = item.importance.rawValue
+            updatedItem.deadline = item.deadLine
+            updatedItem.isDone = item.isDone
+            updatedItem.startTime = item.startTime
+            updatedItem.changeTime = item.changeTime
 
-        appDelegate?.saveContext()
+            try context.save()
+        } catch {
+            let nserror = error as NSError
+            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+        }
     }
 
     public func delete(for id: String) {
@@ -105,13 +135,18 @@ final class CoreDataManager: NSObject, FirstIndexByGettable {
         let request = CoreDataToDoItem.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id)
 
-        guard let context = context,
-              let items = try? context.fetch(request),
-              let deletedItem = items.first else { return }
+        let context = backgroundContext()
 
-        context.delete(deletedItem)
+        do {
+            let items = try context.fetch(request)
+            guard let deletedItem = items.first else { return }
 
-        appDelegate?.saveContext()
+            context.delete(deletedItem)
+            try context.save()
+        } catch {
+            let nserror = error as NSError
+            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+        }
     }
 
     public func updateItemsIntoDatabase(using serverItems: [ToDoItem]) {
@@ -123,12 +158,10 @@ final class CoreDataManager: NSObject, FirstIndexByGettable {
             for id in deleteItems {
                 delete(for: id)
             }
-        } else {
-            let addItems = serverItemsSet.subtracting(itemsSet)
-            for id in addItems {
-                if let item = serverItems.first(where: { $0.id == id }) {
-                    append(item)
-                }
+        }
+        for id in serverItemsSet {
+            if let item = serverItems.first(where: { $0.id == id }) {
+                append(item)
             }
         }
     }

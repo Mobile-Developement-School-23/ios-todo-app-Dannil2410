@@ -408,7 +408,9 @@ extension ItemsListViewController: TableViewRowAppendable {
                 try sqliteHelper?.insert(item: item)
                 if method == .post {
                     coreDataManager.insert(for: item)
-                } else if method == .put { coreDataManager.update(for: item)}
+                } else if method == .put {
+                    coreDataManager.update(for: item)
+                }
                 postOrPutToServer(method: method, item: item)
             }
         } catch {
